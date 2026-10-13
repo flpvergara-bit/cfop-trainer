@@ -549,4 +549,14 @@ select::-ms-expand { display: none; }
 :root[data-cubo="mate"] .cf[data-c="X"]::after { background-image: none; box-shadow: inset 0 -2px 4px rgba(0,0,0,.15); }
 :root[data-cubo="mate"] .dg .bg { fill: #2a2c31; }
 .seg.seg2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Ficha: el caso grande junto al algoritmo (reemplaza la miniatura de la cabecera) */
+.algo-fila { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; }
+.caso-dg { display: grid; place-items: center; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.caso-dg svg.dg { width: 124px; height: 124px; display: block; }
+.det-mini { display: none; }
+@media (max-width: 860px) {
+  .caso-dg { padding: 6px; } .caso-dg svg.dg { width: 96px; height: 96px; }
+  .algo-fila { gap: 12px; } .algo-fila .algo { font-size: 20px; }
+}
+@media (min-width: 861px) { :root[data-estilo] .det-play .algo-fila .algo { font-size: 32px; } }
 </style>

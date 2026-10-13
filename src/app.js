@@ -703,7 +703,7 @@
     bindGroups(algo, det.pl);
     var trigs = []; trigBlocks(moves).forEach(function (b) { if (trigs.indexOf(b.n) < 0) trigs.push(b.n); });
     box.appendChild(h('div', { class: 'det-h' }, [
-      h('span', { html: diagram(c, alg) }),
+      h('span', { class: 'det-mini', html: diagram(c, alg) }),
       h('div', null, [h('p', { class: 'eyebrow', text: gName(c.g) }), h('h2', { id: 'det-nombre', text: c.label + (c.n ? ' · ' + c.n : '') }), c.freq ? h('p', { class: 'nota', text: L('Aparece en 1 de cada ' + c.freq + ' resoluciones.', 'Comes up in 1 of every ' + c.freq + ' solves.') }) : null]),
       h('button', { class: 'btn sm x', 'aria-label': L('Cerrar', 'Close'), html: ICON.x, onclick: closeDetalle })
     ]));
@@ -714,7 +714,7 @@
     play.appendChild(h('div', { class: 'bloque' }, [
       h('div', { class: 'eb-fila' }, [h('p', { class: 'eyebrow eb-guia' }, [L('Algoritmo · ', 'Algorithm · ') + plural(moves.length, 'movimiento', 'movimientos', 'move', 'moves')]),
         h('button', { class: 'btn sm', text: det.edit ? L('Listo', 'Done') : (cuts ? L('Editar secciones', 'Edit sections') : L('Agrupar en secciones', 'Split into sections')), onclick: function () { det.edit = !det.edit; renderDetalle(); } })]),
-      det.edit ? grpEditor(c, alg, moves) : algo,
+      det.edit ? grpEditor(c, alg, moves) : h('div', { class: 'algo-fila' }, [h('span', { class: 'caso-dg', title: L('El caso', 'The case'), html: diagram(c, alg) }), algo]),
       det.edit ? null : (cuts ? h('p', { class: 'nota', text: L('Toca una sección para verla sola en el cubo, desde su inicio. Así puedes repetirla hasta que te salga.', 'Tap a section to see just that part on the cube, from its start. That way you can repeat it until you get it.') }) : null),
       det.edit ? null : controls(det.pl, 'det'),
       h('p', { class: 'nota teclas-hint', text: L('Con el teclado: ← y → paso a paso, Espacio reproduce o pausa.', 'Keyboard: ← and → step by step, Space plays or pauses.') })

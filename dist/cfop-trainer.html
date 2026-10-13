@@ -549,6 +549,16 @@ select::-ms-expand { display: none; }
 :root[data-cubo="mate"] .cf[data-c="X"]::after { background-image: none; box-shadow: inset 0 -2px 4px rgba(0,0,0,.15); }
 :root[data-cubo="mate"] .dg .bg { fill: #2a2c31; }
 .seg.seg2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Ficha: el caso grande junto al algoritmo (reemplaza la miniatura de la cabecera) */
+.algo-fila { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; }
+.caso-dg { display: grid; place-items: center; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.caso-dg svg.dg { width: 124px; height: 124px; display: block; }
+.det-mini { display: none; }
+@media (max-width: 860px) {
+  .caso-dg { padding: 6px; } .caso-dg svg.dg { width: 96px; height: 96px; }
+  .algo-fila { gap: 12px; } .algo-fila .algo { font-size: 20px; }
+}
+@media (min-width: 861px) { :root[data-estilo] .det-play .algo-fila .algo { font-size: 32px; } }
 </style>
 <div class="app">
   <header class="top">
@@ -2099,7 +2109,7 @@ var GUIAS = [
     bindGroups(algo, det.pl);
     var trigs = []; trigBlocks(moves).forEach(function (b) { if (trigs.indexOf(b.n) < 0) trigs.push(b.n); });
     box.appendChild(h('div', { class: 'det-h' }, [
-      h('span', { html: diagram(c, alg) }),
+      h('span', { class: 'det-mini', html: diagram(c, alg) }),
       h('div', null, [h('p', { class: 'eyebrow', text: gName(c.g) }), h('h2', { id: 'det-nombre', text: c.label + (c.n ? ' · ' + c.n : '') }), c.freq ? h('p', { class: 'nota', text: L('Aparece en 1 de cada ' + c.freq + ' resoluciones.', 'Comes up in 1 of every ' + c.freq + ' solves.') }) : null]),
       h('button', { class: 'btn sm x', 'aria-label': L('Cerrar', 'Close'), html: ICON.x, onclick: closeDetalle })
     ]));
@@ -2110,7 +2120,7 @@ var GUIAS = [
     play.appendChild(h('div', { class: 'bloque' }, [
       h('div', { class: 'eb-fila' }, [h('p', { class: 'eyebrow eb-guia' }, [L('Algoritmo · ', 'Algorithm · ') + plural(moves.length, 'movimiento', 'movimientos', 'move', 'moves')]),
         h('button', { class: 'btn sm', text: det.edit ? L('Listo', 'Done') : (cuts ? L('Editar secciones', 'Edit sections') : L('Agrupar en secciones', 'Split into sections')), onclick: function () { det.edit = !det.edit; renderDetalle(); } })]),
-      det.edit ? grpEditor(c, alg, moves) : algo,
+      det.edit ? grpEditor(c, alg, moves) : h('div', { class: 'algo-fila' }, [h('span', { class: 'caso-dg', title: L('El caso', 'The case'), html: diagram(c, alg) }), algo]),
       det.edit ? null : (cuts ? h('p', { class: 'nota', text: L('Toca una sección para verla sola en el cubo, desde su inicio. Así puedes repetirla hasta que te salga.', 'Tap a section to see just that part on the cube, from its start. That way you can repeat it until you get it.') }) : null),
       det.edit ? null : controls(det.pl, 'det'),
       h('p', { class: 'nota teclas-hint', text: L('Con el teclado: ← y → paso a paso, Espacio reproduce o pausa.', 'Keyboard: ← and → step by step, Space plays or pauses.') })
