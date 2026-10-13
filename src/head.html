@@ -167,9 +167,11 @@ kbd { font-family: var(--f-mono); font-size: 11px; border: 1px solid currentColo
 .algo .auf { color: var(--ink-2); font-weight: 400; }
 .nota { font-size: 13px; color: var(--ink-2); }
 /* Movimientos con nombre */
-.algo.con-nombres { row-gap: max(.75em, 20px); padding-bottom: max(15px, .52em); }
+.algo.con-nombres { padding-bottom: 0; }
 .algo.con-grupos:has(.grp-trg) { padding-bottom: max(15px, .52em); }
 .algo .trg, .algo .grp-trg { position: relative; }
+/* El nombre va debajo del gatillo: solo la línea que lo lleva gana espacio extra */
+.algo .trg { margin-bottom: max(15px, .5em); }
 .algo .trg-n { position: absolute; left: 50%; top: calc(100% + 2px); transform: translateX(-50%); font-family: var(--f-body); font-size: max(10.5px, .36em); font-weight: 600; line-height: 1.2; color: var(--accent); white-space: nowrap; pointer-events: none; letter-spacing: .01em; }
 .algo .grp-trg { margin-bottom: .7em; }
 .algo .grp-trg .trg-n { top: calc(100% + 3px); }
@@ -493,7 +495,7 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
 
 /* Escritorio: algoritmo grande bajo el cubo en la ficha, en todos los estilos */
 @media (min-width: 861px) {
-  :root[data-estilo] .det-play .algo { font-size: 36px; line-height: 1.6; gap: 4px 13px; }
+  :root[data-estilo] .det-play .algo { font-size: 36px; line-height: 1.45; gap: 6px 13px; }
   :root[data-estilo] .det-play .algo .trg { gap: 13px; padding: 0 7px; border-bottom-width: 3px; }
   :root[data-estilo] .det-play .algo .mv { padding: 0 4px; border-radius: 6px; }
 }
@@ -512,7 +514,7 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
 
 /* Cronómetro: la pantalla LCD tiene su propio relleno; deja espacio para el nombre del movimiento */
 :root[data-estilo="crono"] .det-play .algo.con-nombres, :root[data-estilo="crono"] .revela .algo.con-nombres,
-:root[data-estilo="crono"] .det-play .algo.con-grupos:has(.grp-trg), :root[data-estilo="crono"] .revela .algo.con-grupos:has(.grp-trg) { padding-bottom: calc(max(15px, .52em) + 10px); }
+:root[data-estilo="crono"] .det-play .algo.con-grupos:has(.grp-trg), :root[data-estilo="crono"] .revela .algo.con-grupos:has(.grp-trg) { padding-bottom: 10px; }
 
 /* Escritorio: el panel del cubo crece si el algoritmo ocupa varias líneas, en vez de desbordarse */
 @media (min-width: 861px) {
@@ -559,6 +561,4 @@ select::-ms-expand { display: none; }
   .algo-fila { gap: 12px; } .algo-fila .algo { font-size: 20px; }
 }
 @media (min-width: 861px) { :root[data-estilo] .det-play .algo-fila .algo { font-size: 32px; } }
-/* Con nombres de gatillos, deja espacio entre líneas para que el nombre no tape la línea de abajo */
-@media (min-width: 861px) { :root[data-estilo] .det-play .algo.con-nombres { row-gap: 26px; } }
 </style>
