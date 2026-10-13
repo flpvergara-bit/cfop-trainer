@@ -1262,7 +1262,7 @@
   }
   /* ---------- Idioma ---------- */
   var STATIC = {
-    'titulo': ['Entrenador OLL y PLL', 'OLL & PLL Trainer'],
+    'titulo': ['Entrenador CFOP', 'CFOP Trainer'],
     'tab-casos': ['Casos', 'Cases'], 'tab-practicar': ['Practicar', 'Practice'], 'tab-tarjetas': ['Tarjetas', 'Flashcards'], 'tab-notacion': ['Notación', 'Notation'],
     'btn-cubo': ['Personalizar', 'Customize'],
     'pr-set-l': ['Qué practicar', 'What to practice'], 'pr-auf-l': ['Mostrar el caso desde un ángulo al azar', 'Show the case from a random angle'],

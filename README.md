@@ -1,8 +1,8 @@
-# Entrenador OLL y PLL
+# CFOP Trainer · Entrenador CFOP
 
 Página para aprender y practicar el método CFOP del cubo de Rubik 3×3: F2L (principiante y los 41 casos), OLL (57 casos) y PLL (21 casos), con cubo 3D animado, práctica cronometrada, tarjetas de repaso y guía de notación.
 
-Todo funciona en un solo archivo HTML, sin instalar nada: `dist/entrenador-oll-pll.html`.
+Todo funciona en un solo archivo HTML, sin instalar nada: `dist/cfop-trainer.html`.
 
 ## Idiomas
 
@@ -12,7 +12,7 @@ La app está en inglés (idioma por defecto) y en español. Se cambia con el bot
 
 La app se publica con GitHub Pages en: **https://flpvergara-bit.github.io/entrenador-cubo/**
 
-- Usa el archivo `docs/index.html`, que `build.js` genera junto con `dist/entrenador-oll-pll.html` (es el mismo contenido como página web completa).
+- Usa el archivo `docs/index.html`, que `build.js` genera junto con `dist/cfop-trainer.html` (es el mismo contenido como página web completa).
 - Para activarla por primera vez: en GitHub, pestaña **Settings** → **Pages** → en "Branch" elige `main` y la carpeta `/docs` → **Save**.
 - Cada cambio que se sube a la rama `main` actualiza la página sola en uno o dos minutos.
 - En esa web el progreso se guarda en el navegador de cada persona (no se sincroniza entre dispositivos).
@@ -21,7 +21,7 @@ La app se publica con GitHub Pages en: **https://flpvergara-bit.github.io/entren
 
 | Archivo | Qué es |
 |---|---|
-| `dist/entrenador-oll-pll.html` | La página terminada. Se abre con doble clic en cualquier navegador. |
+| `dist/cfop-trainer.html` | La página terminada. Se abre con doble clic en cualquier navegador. |
 | `docs/index.html` | La misma página, lista para GitHub Pages. |
 | `src/engine.js` | Simulador del cubo: aplica movimientos y comprueba que un algoritmo resuelve su caso. |
 | `src/data.js` | Casos de OLL y PLL con sus algoritmos. |
@@ -52,7 +52,7 @@ Solo hace falta si cambias algún archivo de `src/`. Necesitas **Node.js** (grat
 3. Escribe estos comandos, uno por uno, pulsando Enter después de cada uno:
    - `node src/verify.js` — revisa OLL y PLL. Al final debe decir `errores 0`.
    - `node src/verificar-guias.js` — revisa los algoritmos de las guías.
-   - `node src/build.js` — crea de nuevo `dist/entrenador-oll-pll.html`.
+   - `node src/build.js` — crea de nuevo `dist/cfop-trainer.html`.
 
 ## Progreso
 
