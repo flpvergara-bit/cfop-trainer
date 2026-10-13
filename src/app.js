@@ -764,7 +764,7 @@
       kids.push(msg);
       kids.push(h('p', { class: 'nota', text: L('Se comprueba en el simulador antes de guardarlo: solo se acepta si resuelve este mismo caso.', 'It is checked in the simulator before saving: it is only accepted if it solves this exact case.') }));
     }
-    info.appendChild(h('div', { class: 'bloque' }, kids));
+    if (c.kind !== 'eo' || conAlts) info.appendChild(h('div', { class: 'bloque' }, kids));
     if (dlg.open) requestAnimationFrame(fitDetPlay);
   }
 
