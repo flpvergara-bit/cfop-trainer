@@ -4,11 +4,25 @@ Página para aprender y practicar el método CFOP del cubo de Rubik 3×3: F2L (p
 
 Todo funciona en un solo archivo HTML, sin instalar nada: `dist/entrenador-oll-pll.html`.
 
+## Idiomas
+
+La app está en inglés (idioma por defecto) y en español. Se cambia con el botón **ES / EN** de arriba o en **Customize → Language**; la elección se guarda con el progreso. Los textos de los dos idiomas están juntos en `src/app.js`, como pares `L('español', 'English')`.
+
+## Página web pública (gratis)
+
+La app se publica con GitHub Pages en: **https://flpvergara-bit.github.io/entrenador-cubo/**
+
+- Usa el archivo `docs/index.html`, que `build.js` genera junto con `dist/entrenador-oll-pll.html` (es el mismo contenido como página web completa).
+- Para activarla por primera vez: en GitHub, pestaña **Settings** → **Pages** → en "Branch" elige `main` y la carpeta `/docs` → **Save**.
+- Cada cambio que se sube a la rama `main` actualiza la página sola en uno o dos minutos.
+- En esa web el progreso se guarda en el navegador de cada persona (no se sincroniza entre dispositivos).
+
 ## Qué hay en cada carpeta
 
 | Archivo | Qué es |
 |---|---|
 | `dist/entrenador-oll-pll.html` | La página terminada. Se abre con doble clic en cualquier navegador. |
+| `docs/index.html` | La misma página, lista para GitHub Pages. |
 | `src/engine.js` | Simulador del cubo: aplica movimientos y comprueba que un algoritmo resuelve su caso. |
 | `src/data.js` | Casos de OLL y PLL con sus algoritmos. |
 | `src/f2l-data.js` | Casos de F2L (generado por `f2lgen.js`). |

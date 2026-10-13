@@ -2,17 +2,18 @@
   <header class="top">
     <div class="brand">
       <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-      <h1>Entrenador OLL y PLL</h1>
+      <h1 data-t="titulo">OLL &amp; PLL Trainer</h1>
     </div>
-    <div class="tabs" role="tablist" aria-label="Secciones">
-      <button class="tab" role="tab" id="tab-casos" data-v="casos" aria-selected="true">Casos</button>
-      <button class="tab" role="tab" id="tab-practicar" data-v="practicar" aria-selected="false">Practicar</button>
-      <button class="tab" role="tab" id="tab-tarjetas" data-v="tarjetas" aria-selected="false">Tarjetas</button>
-      <button class="tab" role="tab" id="tab-notacion" data-v="notacion" aria-selected="false">Notación</button>
+    <div class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-casos" data-v="casos" aria-selected="true" data-t="tab-casos">Cases</button>
+      <button class="tab" role="tab" id="tab-practicar" data-v="practicar" aria-selected="false" data-t="tab-practicar">Practice</button>
+      <button class="tab" role="tab" id="tab-tarjetas" data-v="tarjetas" aria-selected="false" data-t="tab-tarjetas">Flashcards</button>
+      <button class="tab" role="tab" id="tab-notacion" data-v="notacion" aria-selected="false" data-t="tab-notacion">Notation</button>
     </div>
-    <button class="btn sm" id="btn-cubo">Personalizar</button>
+    <button class="btn sm" id="btn-cubo" data-t="btn-cubo">Customize</button>
+    <button class="btn sm" id="btn-lang"></button>
     <button class="btn sm" id="btn-tema"></button>
-    <p class="sync" id="sync" data-s="local">Progreso guardado en este navegador</p>
+    <p class="sync" id="sync" data-s="local">Progress saved in this browser</p>
   </header>
 
   <section id="v-casos" class="vista" role="tabpanel" aria-labelledby="tab-casos">
@@ -25,15 +26,15 @@
   <section id="v-practicar" class="vista" hidden role="tabpanel" aria-labelledby="tab-practicar">
     <div class="vista">
       <div class="pr-top">
-        <label for="pr-set">Qué practicar
+        <label for="pr-set"><span data-t="pr-set-l">What to practice</span>
           <select id="pr-set"></select>
         </label>
-        <label class="check" for="pr-auf"><input type="checkbox" id="pr-auf"> Mostrar el caso desde un ángulo al azar</label>
+        <label class="check" for="pr-auf"><input type="checkbox" id="pr-auf"> <span data-t="pr-auf-l">Show the case from a random angle</span></label>
       </div>
       <ol class="pasos">
-        <li>Arma el caso en tu cubo con la mezcla.</li>
-        <li>Pulsa <kbd>Espacio</kbd> y haz el algoritmo de memoria.</li>
-        <li>Detén el cronómetro y evalúate.</li>
+        <li data-t="paso1">Set up the case on your cube with the scramble.</li>
+        <li data-t="paso2">Press <kbd>Space</kbd> and do the algorithm from memory.</li>
+        <li data-t="paso3">Stop the timer and rate yourself.</li>
       </ol>
       <div id="pr-cuerpo"></div>
       <div class="sesion" id="sesion"></div>
@@ -42,12 +43,12 @@
 
   <section id="v-tarjetas" class="vista" hidden role="tabpanel" aria-labelledby="tab-tarjetas">
     <div class="pr-top">
-      <label for="fc-set">Qué tarjetas
+      <label for="fc-set"><span data-t="fc-set-l">Which cards</span>
         <select id="fc-set"></select>
       </label>
-      <label class="check" for="fc-girar"><input type="checkbox" id="fc-girar"> Girar los casos de OLL y PLL al azar</label>
+      <label class="check" for="fc-girar"><input type="checkbox" id="fc-girar"> <span data-t="fc-girar-l">Rotate OLL and PLL cases at random</span></label>
     </div>
-    <p class="nota">Mira el caso y trata de recordar el algoritmo. Toca la tarjeta (o pulsa <kbd>Espacio</kbd>) para darla vuelta y comprobarlo.</p>
+    <p class="nota" data-t="fc-ayuda">Mira el caso y trata de recordar el algoritmo. Toca la tarjeta (o pulsa <kbd>Espacio</kbd>) para darla vuelta y comprobarlo.</p>
     <div class="fc" id="fc-cuerpo"></div>
     <p class="nota fc-ses" id="fc-sesion" role="status"></p>
   </section>
@@ -56,8 +57,8 @@
     <div class="not">
       <div class="not-izq">
         <div class="escena"><div id="not-cubo"></div></div>
-        <p class="lectura" id="not-lee">Toca una letra para ver el giro en el cubo.</p>
-        <div class="bajo-cubo"><span>Blanco arriba, verde al frente</span><button class="btn sm" id="not-reset">Dejarlo resuelto</button></div>
+        <p class="lectura" id="not-lee" data-t="not-lee">Tap a letter to see the turn on the cube.</p>
+        <div class="bajo-cubo"><span data-t="not-pos">White on top, green in front</span><button class="btn sm" id="not-reset" data-t="not-reset">Reset to solved</button></div>
       </div>
       <div class="not-der" id="not-der"></div>
     </div>
