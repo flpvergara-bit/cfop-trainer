@@ -1,0 +1,27 @@
+/* Algoritmos de referencia (wiki de speedsolving) para cruzar numeración y nombres */
+module.exports = {
+ OLL1:["R U2' R2' F R F' U2 R' F R F'","R U' R2 D' r U' r' D R2 U R'"], OLL2:["F R U R' U' S R U R' U' f'","f U R U' R' S' U R U' R' F'"],
+ OLL3:["f R U R' U' f' U' F R U R' U' F'","r' R2 U R' U r U2 r' U M'"], OLL4:["f R U R' U' f' U F R U R' U' F'","R' F2 R2 U2' R' F' R U2' R2' F2 R"],
+ OLL5:["l' U2 L U L' U l","r' U2' R U R' U r"], OLL6:["r U2 R' U' R U' r'"], OLL7:["r U R' U R U2 r'"], OLL8:["l' U' L U' L' U2 l","r' U' R U' R' U2 r","R U2' R' U2 R' F R F'"],
+ OLL9:["R U R' U' R' F R2 U R' U' F'"], OLL10:["R U R' U R' F R F' R U2' R'","F U F' R' F R U' R' F' R"], OLL11:["r' R2 U R' U R U2' R' U M'","r U R' U R' F R F' R U2' r'"],
+ OLL12:["r R2' U' R U' R' U2 R U' r' R","l L2' U' L U' L' U2 L U' M'"], OLL13:["F U R U2' R' U' R U R' F'"],
+ OLL17:["R U R' U R' F R F' U2 R' F R F'","F R' F' R U S' R U' R' S"], OLL18:["R U2 R2 F R F' U2 M' U R U' r'","r U R' U R U2 r2' U' R U' R' U2 r"],
+ OLL19:["S' R U R' S U' R' F R F'","r' R U R U R' U' r R2 F R F'"], OLL20:["S' R U R' S U' M' U R U' r'","r U R' U' r R' M' U R U' R' U' M'"],
+ OLL21:["R U R' U R U' R' U R U2 R'"], OLL22:["R U2' R2' U' R2 U' R2' U2' R"], OLL23:["R2' D' R U2 R' D R U2 R","R2 D R' U2 R D' R' U2 R'"],
+ OLL24:["r U R' U' r' F R F'","l' U' L U l F' L' F"], OLL25:["F R' F' r U R U' r'","F' r U R' U' r' F R","F R B R' F' R B' R'"], OLL26:["R U2 R' U' R U' R'","R' U' R U' R' U2 R","L' U' L U' L' U2 L"],
+ OLL27:["R U R' U R U2' R'","R' U2' R U R' U R"], OLL31:["R' U' F U R U' R' F' R"], OLL32:["S R U R' U' R' F R f'","L U F' U' L' U L F L'","R U B' U' R' U R B R'"],
+ OLL33:["R U R' U' R' F R F'"], OLL34:["R U R2' U' R' F R U R U' F'"], OLL35:["R U2' R2' F R F' R U2' R'"], OLL36:["L' U' L U' L' U L U L F' L' F","R U R2' F' U' F U R2 U2' R'"],
+ OLL37:["F R' F' R U R U' R'"], OLL38:["R U R' U R U' R' U' R' F R F'"], OLL39:["L F' L' U' L U F U' L'","R U R' F' U' F U R U2' R'"], OLL40:["R' F R U R' U' F' U R"],
+ OLL43:["R' U' F' U F R"], OLL44:["F U R U' R' F'","f R U R' U' f'"], OLL45:["F R U R' U' F'"], OLL46:["R' U' R' F R F' U R"],
+ OLL47:["F R' F' R U2 R U' R' U R U2' R'","R' U' R' F R F' R' F R F' U R","F' L' U' L U L' U' L U F"], OLL48:["F R U R' U' R U R' U' F'"],
+ OLL49:["r U' r2' U r2 U r2' U' r","R B' R2' F R2 B R2' F' R"], OLL50:["R' F R2 B' R2' F' R2 B R'","r' U r2 U' r2' U' r2 U r'"],
+ OLL51:["F U R U' R' U R U' R' F'","f R U R' U' R U R' U' f'"], OLL52:["R U R' U R U' B U' B' R'","R' F' U' F U' R U R' U R"],
+ OLL53:["l' U' L U' L' U L U' L' U2 l","r' U2' R U R' U' R U R' U r"], OLL54:["r U R' U R U' R' U R U2' r'","r U2' R' U' R U R' U' R U' r'"],
+ OLL55:["R' F R U R U' R2' F' R2 U' R' U R U R'","r U2' R' U' r' R2 U R' U' r U' r'"], OLL56:["r U r' U R U' R' U R U' R' r U' r'","r U r' U R U' R' M' U R U2' r'"],
+ Aa:["x R' U R' D2 R U' R' D2 R2 x'","x L2 D2' L' U' L D2' L' U L' x'","R' D R U' R' D' R U' R' D R U2 R' D' R"], Ab:["x R2' D2 R U R' D2 R U' R x'","x L U' L D2' L' U L D2' L2' x'"],
+ E:["x' R U' R' D R U R' D' R U R' D R U' R' D' x"], F:["R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R"],
+ Ga:["R2 U R' U R' U' R U' R2 D U' R' U R D'","R2' u R' U R' U' R u' R2 y' R' U R"], Gb:["R' U' R U D' R2 U R' U R U' R U' R2 D","R' U' R y R2 u R' U R U' R u' R2"],
+ Gc:["R2 U' R U' R U R' U R2 D' U R U' R' D","R2' u' R U' R U R' u R2 y R U' R'"], Gd:["R U R' U' D R2 U' R U' R' U R' U R2 D'","R U R' y' R2 u' R U' R' U R' u R2"],
+ H:["M2' U M2' U2 M2' U M2'"], Ua:["R U R' U R' U' R2 U' R' U R' U R","M2' U M U2 M' U M2'","R U' R U R U R U' R' U' R2"], Ub:["R' U R' U' R3 U' R' U R U R2","M2 U' M U2 M' U' M2","R2' U R U R' U' R3 U' R' U R'"],
+ Z:["M' U M2' U M2' U M' U2 M2'","M2' U M2' U M' U2 M2' U2 M'"]
+};

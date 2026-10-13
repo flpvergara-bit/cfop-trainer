@@ -1,0 +1,2521 @@
+<title>Entrenador OLL y PLL</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: herramienta de tres vistas (Casos · Practicar · Notación). La ruta de 4 etapas va arriba como resumen;
+   el color lo ponen las pegatinas del cubo, la interfaz se queda en pizarra fría con un solo acento cobalto. */
+:root {
+  --bg: #eceff4; --surface: #ffffff; --surface-2: #f4f6fa; --ink: #131926; --ink-2: #505b6e; --line: #d3d9e4;
+  --accent: #1b4fd6; --accent-ink: #ffffff; --accent-soft: #e2e9fb;
+  --ok: #1c8048; --ok-soft: #dff2e6; --warn: #a96a08; --warn-soft: #fbeed3; --bad: #bf342c; --bad-soft: #fbe3e0;
+  --cu-U: #f6d21c; --cu-D: #f3f3ee; --cu-F: #1ea34a; --cu-R: #f1851a; --cu-B: #1d5fd8; --cu-L: #d62c2c;
+  --guia: #6d38d6; --guia-soft: #eee6fd;
+  --lcd: #aebba3; --lcd-ink: #1b2219; --pop-shadow: none;
+  --marca-ink: #1a1d24; --marca-img: none; --marca-txt: ""; --marca-fs: .36;
+  --plastic: #14161b; --cell-off: #c5ccd8; --cell-unk: #dfe3ea; --arrow: #10131a; --stage: #e2e6ee;
+  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1219; --surface: #171b25; --surface-2: #1d222e; --ink: #e8ebf2; --ink-2: #9aa5b8; --line: #2b3242;
+  --accent: #7da2ff; --accent-ink: #0b1124; --accent-soft: #1c2947;
+  --ok: #58c486; --ok-soft: #153324; --warn: #e3ad4b; --warn-soft: #3a2c10; --bad: #f0857c; --bad-soft: #3d1c19;
+  --cu-U: #f2cd14; --cu-D: #ecece6; --cu-F: #23a850; --cu-R: #f0821a; --cu-B: #2a6be6; --cu-L: #d93232;
+  --plastic: #06070a; --cell-off: #3a4354; --cell-unk: #262d3a; --arrow: #10131a; --stage: #222836; --guia: #c3a6ff; --guia-soft: #2b2146;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1219; --surface: #171b25; --surface-2: #1d222e; --ink: #e8ebf2; --ink-2: #9aa5b8; --line: #2b3242;
+  --accent: #7da2ff; --accent-ink: #0b1124; --accent-soft: #1c2947;
+  --ok: #58c486; --ok-soft: #153324; --warn: #e3ad4b; --warn-soft: #3a2c10; --bad: #f0857c; --bad-soft: #3d1c19;
+  --cu-U: #f2cd14; --cu-D: #ecece6; --cu-F: #23a850; --cu-R: #f0821a; --cu-B: #2a6be6; --cu-L: #d93232;
+  --plastic: #06070a; --cell-off: #3a4354; --cell-unk: #262d3a; --arrow: #10131a; --stage: #222836; --guia: #c3a6ff; --guia-soft: #2b2146;
+  color-scheme: dark }
+
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.app { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 18px 56px; display: flex; flex-direction: column; gap: 22px; }
+.mono { font-family: var(--f-mono); }
+.eyebrow { margin: 0; font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); }
+h1, h2, h3, p { margin: 0; }
+h2 { font-family: var(--f-display); font-weight: 800; font-size: 22px; line-height: 1.15; text-wrap: balance; }
+h3 { font-family: var(--f-display); font-weight: 600; font-size: 16px; }
+
+.vista { display: grid; gap: 18px; min-width: 0; }
+#lista { gap: 24px; }
+
+/* Cabecera */
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+.brand h1 { font-family: var(--f-display); font-weight: 800; font-size: 21px; letter-spacing: -.01em; }
+.logo { display: grid; grid-template-columns: repeat(3, 8px); gap: 2px; padding: 3px; background: var(--plastic); border-radius: 5px; }
+.logo i { width: 8px; height: 8px; border-radius: 1.5px; background: var(--cu-U); }
+.logo i:nth-child(1), .logo i:nth-child(6), .logo i:nth-child(8) { background: var(--cell-off); }
+.tabs { display: flex; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; }
+.tab { border: 0; background: transparent; padding: 7px 16px; border-radius: 999px; font-weight: 600; color: var(--ink-2); }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.sync { font-size: 12.5px; color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+.sync::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-2); }
+.sync[data-s="cloud"]::before { background: var(--ok); }
+.sync[data-s="saving"]::before { background: var(--warn); }
+
+/* Ruta de etapas */
+.ruta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.etapa { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.etapa[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.etapa b { font-family: var(--f-display); font-weight: 800; font-size: 16.5px; line-height: 1.15; }
+.etapa .cnt { font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.meter { height: 6px; border-radius: 3px; background: var(--line); display: flex; overflow: hidden; }
+.meter span { display: block; height: 100%; }
+.meter .m-ok { background: var(--ok); } .meter .m-warn { background: var(--warn); }
+.como { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 6px; }
+.como p { max-width: 78ch; color: var(--ink-2); }
+.como p strong { color: var(--ink); font-weight: 600; }
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.leyenda { margin-left: auto; display: flex; gap: 14px; font-size: 12.5px; color: var(--ink-2); flex-wrap: wrap; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--ink-2); vertical-align: baseline; margin-right: 5px; }
+.dot[data-s="1"] { background: var(--warn); border-color: var(--warn); }
+.dot[data-s="2"] { background: var(--ok); border-color: var(--ok); }
+
+/* Grupos y tarjetas de casos */
+.grupo { display: grid; gap: 10px; }
+.grupo-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding-top: 4px; }
+.grupo-h p { color: var(--ink-2); font-size: 13.5px; }
+.casos { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 10px; }
+.caso { position: relative; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; grid-template-columns: 60px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 6px 10px; align-items: start; min-width: 0; }
+.caso:hover { border-color: var(--ink-2); }
+.caso svg { width: 60px; height: 60px; display: block; }
+.caso .nm { font-family: var(--f-display); font-weight: 800; font-size: 16px; line-height: 1.1; padding-right: 14px; }
+.caso .ap { display: block; font-family: var(--f-body); font-weight: 500; font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+.caso .alg { grid-column: 1 / -1; font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; color: var(--ink-2); overflow-wrap: anywhere; }
+.caso .dot { position: absolute; top: 12px; right: 10px; margin: 0; }
+
+/* Insignia: algoritmo de las guías impresas */
+.guia { display: inline-block; font-family: var(--f-body); font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; background: var(--guia-soft); color: var(--guia); vertical-align: middle; white-space: nowrap; line-height: 1.6; }
+.caso .nm .guia { margin-top: 4px; display: table; }
+.eb-guia { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.alt .guia { margin-left: auto; flex: none; }
+.quien .guia, .dorso .guia { margin: 0; }
+:root[data-estilo="crono"] { --guia: #c3a6ff; --guia-soft: #2b2146; }
+
+/* Diagramas */
+.dg .u { fill: var(--cu-U); } .dg .off { fill: var(--cell-off); } .dg .unk { fill: var(--cell-unk); stroke: var(--cell-off); stroke-width: 1; stroke-dasharray: 2 2; }
+.dg .cR { fill: var(--cu-R); } .dg .cL { fill: var(--cu-L); } .dg .cF { fill: var(--cu-F); } .dg .cB { fill: var(--cu-B); } .dg .cU { fill: var(--cu-U); } .dg .cD { fill: var(--cu-D); }
+.dg .bg { fill: var(--plastic); } .dg .cX { fill: var(--cell-off); }
+.dg .ar { stroke: var(--arrow); stroke-width: 2.2; stroke-linecap: round; fill: none; } .dg .ah { fill: var(--arrow); }
+
+/* Cubo 3D */
+.escena { background: var(--stage); border-radius: var(--r); display: grid; place-items: center; padding: 8px; }
+.c3d { --s: 50px; position: relative; width: min(100%, 290px); aspect-ratio: 1; perspective: calc(var(--s) * 13); touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; }
+.c3d:active { cursor: grabbing; }
+.c3d-rot { position: absolute; left: 50%; top: 46%; width: 0; height: 0; transform-style: preserve-3d; }
+.c3d-frente { position: absolute; left: 0; top: 0; display: grid; justify-items: center; gap: calc(var(--s) * .07); padding-left: .12em; white-space: nowrap; pointer-events: none;
+  font: 800 calc(var(--s) * .38) / 1 var(--f-display); letter-spacing: .12em; color: var(--ink); opacity: .85; transform-origin: 0 0;
+  transform: translate3d(0, calc(var(--s) * 1.5), calc(var(--s) * 1.78)) rotateX(90deg) translate(-50%, 0); }
+.c3d-frente::before { content: ""; width: 0; height: 0; border-left: calc(var(--s) * .24) solid transparent; border-right: calc(var(--s) * .24) solid transparent; border-bottom: calc(var(--s) * .28) solid currentColor; }
+.cubie { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
+.cf { position: absolute; width: var(--s); height: var(--s); left: calc(var(--s) / -2); top: calc(var(--s) / -2); background: var(--plastic); backface-visibility: hidden; }
+.cf::after { content: ""; position: absolute; inset: 5.5%; border-radius: 13%; background: transparent; }
+.cf[data-c]::after { background-image: linear-gradient(140deg, rgba(255,255,255,.2), rgba(255,255,255,0) 45%, rgba(0,0,0,.1)); }
+.cf[data-c="U"]::after { background-color: var(--cu-U); } .cf[data-c="D"]::after { background-color: var(--cu-D); }
+.cf[data-c="F"]::after { background-color: var(--cu-F); } .cf[data-c="B"]::after { background-color: var(--cu-B); }
+.cf[data-c="R"]::after { background-color: var(--cu-R); } .cf[data-c="L"]::after { background-color: var(--cu-L); }
+.cf[data-c="X"]::after { background-color: var(--cell-off); background-image: none; }
+.c3d.blanca .cf[data-c="U"]::after { background-color: var(--cu-D); } .c3d.blanca .cf[data-c="D"]::after { background-color: var(--cu-U); }
+.c3d.blanca .cf[data-c="R"]::after { background-color: var(--cu-L); } .c3d.blanca .cf[data-c="L"]::after { background-color: var(--cu-R); }
+.cf.marca::before { content: var(--marca-txt); position: absolute; inset: 15%; z-index: 1; display: grid; place-items: center; overflow: hidden; white-space: nowrap;
+  background: var(--marca-img) center / contain no-repeat; color: var(--marca-ink); font: 800 calc(var(--s) * var(--marca-fs)) / 1 var(--f-display); letter-spacing: -.02em; transform: rotate(var(--mr, 0deg)); }
+.cf-F { transform: translateZ(calc(var(--s) / 2)); } .cf-B { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
+.cf-R { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); } .cf-L { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
+.cf-U { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); } .cf-D { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
+.bajo-cubo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--ink-2); }
+
+/* Botones */
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 14px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; }
+.btn:hover { border-color: var(--ink-2); }
+.btn.pri { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.sm { padding: 5px 10px; min-height: 30px; font-size: 13px; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn svg { width: 16px; height: 16px; fill: currentColor; flex: none; }
+.lbls { display: grid; justify-items: center; } .lbls > span { grid-area: 1 / 1; visibility: hidden; white-space: nowrap; } .lbls > span.on { visibility: visible; }
+.ic { display: inline-flex; }
+kbd { font-family: var(--f-mono); font-size: 11px; border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; opacity: .75; }
+.ctrl { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ctrl select, .campo select, .campo input[type="text"] { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; min-height: 38px; min-width: 0; }
+
+/* Algoritmo con movimientos */
+.algo { font-family: var(--f-mono); font-size: 19px; font-weight: 600; line-height: 1.9; display: flex; flex-wrap: wrap; gap: 2px 7px; align-items: baseline; }
+.algo .trg { display: inline-flex; gap: 7px; padding: 0 5px; margin: 0 -1px; border-bottom: 2px solid var(--accent); border-radius: 4px 4px 0 0; background: var(--accent-soft); }
+.algo .mv { border-radius: 4px; padding: 0 2px; }
+.algo .mv.on { background: var(--ink); color: var(--bg); }
+.algo .mv.hecho { color: var(--ink-2); }
+.algo .auf { color: var(--ink-2); font-weight: 400; }
+.nota { font-size: 13px; color: var(--ink-2); }
+/* Movimientos con nombre */
+.algo.con-nombres { row-gap: .75em; padding-bottom: max(15px, .52em); }
+.algo.con-grupos:has(.grp-trg) { padding-bottom: max(15px, .52em); }
+.algo .trg, .algo .grp-trg { position: relative; }
+.algo .trg-n { position: absolute; left: 50%; top: calc(100% + 2px); transform: translateX(-50%); font-family: var(--f-body); font-size: max(10.5px, .36em); font-weight: 600; line-height: 1.2; color: var(--accent); white-space: nowrap; pointer-events: none; letter-spacing: .01em; }
+.algo .grp-trg { margin-bottom: .7em; }
+.algo .grp-trg .trg-n { top: calc(100% + 3px); }
+.trig-lista { display: grid; gap: 6px; }
+.trig-fila { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) auto; gap: 6px; align-items: center; }
+.trig-fila input { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; min-height: 34px; min-width: 0; font-size: 13px; }
+.trig-fila input.mono { font-family: var(--f-mono); }
+.trig-msg { grid-column: 1 / -1; margin: -2px 0 2px; font-size: 12px; }
+.trig-msg:empty { display: none; }
+#ajustes .check { color: var(--ink); font-size: 13.5px; display: flex; gap: 8px; align-items: center; }
+/* Secciones propias */
+.algo.con-grupos { gap: 8px 10px; }
+.algo .grp { display: inline-flex; align-items: baseline; gap: .32em; padding: .05em .4em .05em .3em; border: 1.5px solid var(--line); border-radius: .3em; background: var(--surface); cursor: pointer; }
+.algo .grp::before { content: attr(data-n); font-family: var(--f-body); font-size: .42em; font-weight: 700; color: var(--accent); align-self: flex-start; margin-top: .35em; }
+.algo .grp:hover { border-color: var(--accent); }
+.revela .algo .grp, .dorso .algo .grp { cursor: pointer; }
+.dorso .algo .grp { cursor: default; }
+.algo.editando { gap: 0; align-items: center; }
+.algo.editando .mv { padding: 0 2px; }
+.corte { width: 22px; align-self: stretch; min-height: 1.6em; border: 0; background: none; position: relative; padding: 0; margin: 0 1px; border-radius: 4px; }
+.corte::after { content: ""; position: absolute; left: 50%; top: 18%; bottom: 18%; border-left: 2px dashed var(--line); transform: translateX(-1px); }
+.corte:hover::after { border-left-color: var(--ink-2); }
+.corte.on::after { border-left: 3px solid var(--accent); top: 6%; bottom: 6%; }
+.corte:hover { background: var(--accent-soft); }
+.eb-fila { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+
+/* Detalle */
+dialog#detalle { border: 0; padding: 0; margin: 0 0 0 auto; width: min(470px, 100%); max-width: 100%; height: 100%; max-height: 100%; background: var(--surface); color: var(--ink); box-shadow: -12px 0 40px rgba(0,0,0,.25); }
+dialog#detalle::backdrop { background: rgba(8, 10, 16, .5); }
+.det-play, .det-info { display: grid; gap: 16px; align-content: start; min-width: 0; }
+.teclas-hint { display: none; }
+.det { display: grid; gap: 16px; padding: 18px 20px 28px; padding-top: calc(18px + env(safe-area-inset-top, 0px)); }
+.det-h { display: flex; align-items: flex-start; gap: 12px; }
+.det-h svg.dg { width: 64px; height: 64px; flex: none; }
+.det-h h2 { font-size: 26px; }
+.det-h .x { margin-left: auto; }
+.bloque { display: grid; gap: 8px; }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 8px 6px; font-weight: 600; font-size: 13.5px; color: var(--ink-2); border-left: 1px solid var(--line); }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"][data-s="0"] { background: var(--ink); color: var(--bg); }
+.seg button[aria-pressed="true"][data-s="1"] { background: var(--warn-soft); color: var(--warn); }
+.seg button[aria-pressed="true"][data-s="2"] { background: var(--ok-soft); color: var(--ok); }
+.datos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.datos div { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; }
+.datos dt { font-size: 11.5px; color: var(--ink-2); }
+.datos dd { margin: 0; font-family: var(--f-mono); font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; }
+dl { margin: 0; }
+.alts { display: grid; gap: 6px; }
+.alt { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; background: var(--surface); text-align: left; font-family: var(--f-mono); font-size: 13px; overflow-wrap: anywhere; }
+.alt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.alt i { flex: none; width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--ink-2); }
+.alt[aria-pressed="true"] i { border: 4px solid var(--accent); }
+.campo { display: flex; gap: 6px; }
+.campo input[type="text"] { flex: 1; font-family: var(--f-mono); font-size: 13px; }
+.msg { font-size: 13px; } .msg.ok { color: var(--ok); } .msg.bad { color: var(--bad); }
+
+/* Mi cubo */
+dialog#ajustes { border: 1px solid var(--line); border-radius: 14px; padding: 0; width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); background: var(--surface); color: var(--ink); }
+dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
+.aj { display: grid; gap: 14px; padding: 18px 20px 22px; }
+.aj .c3d { width: min(100%, 200px); }
+.marcas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.marca-b { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 4px; display: grid; justify-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--ink-2); min-width: 0; }
+.marca-b[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.marca-b i { width: 34px; height: 34px; border-radius: 6px; border: 2px solid var(--plastic); background: var(--cu-D) center / 68% no-repeat; display: grid; place-items: center; font: 800 12px/1 var(--f-display); font-style: normal; color: var(--marca-ink); overflow: hidden; }
+.aj input[type="file"] { max-width: 100%; font-size: 13px; }
+
+/* Practicar */
+.pr-top { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: end; }
+.pr-top label { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
+.pr-top select { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; min-height: 38px; color: var(--ink); max-width: 100%; }
+.check { display: flex !important; grid-auto-flow: column; align-items: center; gap: 8px !important; min-height: 38px; color: var(--ink) !important; font-size: 14px !important; }
+.check input { width: 17px; height: 17px; accent-color: var(--accent); }
+.pasos { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 13.5px; color: var(--ink-2); padding: 0; margin: 0; list-style-position: inside; }
+.pr { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.pr-izq { display: grid; gap: 8px; align-content: start; }
+.pr-der { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.mezcla { font-family: var(--f-mono); font-size: 21px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.crono { font-family: var(--f-mono); font-weight: 600; font-size: clamp(54px, 11vw, 92px); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; padding: 6px 0; }
+.crono[data-f="running"] { color: var(--accent); }
+.acc { display: flex; flex-wrap: wrap; gap: 8px; }
+.revela { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 8px; }
+.revela .quien { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+.revela .quien b { font-family: var(--f-display); font-weight: 800; font-size: 22px; }
+.eval { display: grid; gap: 8px; }
+.eval .acc .btn { flex: 1 1 130px; }
+.btn.e-ok { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+.btn.e-warn { border-color: var(--warn); color: var(--warn); background: var(--warn-soft); }
+.btn.e-bad { border-color: var(--bad); color: var(--bad); background: var(--bad-soft); }
+.vacio { background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; padding: 26px 20px; display: grid; gap: 10px; justify-items: start; }
+.sesion { display: grid; gap: 8px; }
+.sesion ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.sesion li { display: grid; grid-template-columns: minmax(0, 1fr) 70px 110px; gap: 10px; align-items: center; padding: 6px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font-size: 13.5px; }
+.sesion li span:nth-child(2) { font-family: var(--f-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.pill { justify-self: end; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill[data-r="0"] { background: var(--ok-soft); color: var(--ok); } .pill[data-r="1"] { background: var(--warn-soft); color: var(--warn); } .pill[data-r="2"] { background: var(--bad-soft); color: var(--bad); }
+
+
+/* Tarjetas */
+.fc { display: grid; gap: 14px; justify-items: center; }
+.flash { width: min(100%, 460px); border: 0; padding: 0; background: none; perspective: 1400px; text-align: center; border-radius: 18px; }
+.flash-in { display: grid; transition: transform .5s cubic-bezier(.3,.1,.3,1); transform-style: preserve-3d; }
+.flash.vuelta .flash-in { transform: rotateY(180deg); }
+.cara { grid-area: 1 / 1; -webkit-backface-visibility: hidden; backface-visibility: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px 20px; display: grid; gap: 12px; justify-items: center; align-content: center; min-height: 390px; box-shadow: 0 12px 34px rgba(10, 14, 24, .10); min-width: 0; }
+.flash:hover .cara { border-color: var(--ink-2); }
+.dorso { transform: rotateY(180deg); }
+.dorso h2 { font-size: 30px; }
+.dorso .algo { justify-content: center; font-size: 22px; }
+.fc-dg svg { width: min(64vw, 250px); height: auto; display: block; }
+.fc-dg { transition: none; }
+.fc-pos { display: flex; align-items: center; gap: 12px; text-align: left; max-width: 340px; }
+.fc-mini svg { width: 64px; height: 64px; display: block; }
+.fc-acc { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.fc-ses { text-align: center; }
+@media (prefers-reduced-motion: reduce) { .flash-in { transition: none; } }
+
+/* Notación */
+.not { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.not-izq { display: grid; gap: 8px; position: sticky; top: calc(12px + env(safe-area-inset-top, 0px)); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.not-der { display: grid; gap: 18px; min-width: 0; }
+.lectura { min-height: 3.1em; font-size: 14px; }
+.lectura b { font-family: var(--f-mono); font-size: 17px; margin-right: 8px; }
+.teclas { display: flex; flex-wrap: wrap; gap: 6px; }
+.tecla { width: 46px; height: 42px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; font-family: var(--f-mono); font-weight: 600; font-size: 16px; }
+.tecla:hover { border-color: var(--ink-2); }
+.fam { display: grid; gap: 6px; }
+.fam p { color: var(--ink-2); font-size: 13.5px; max-width: 70ch; }
+.gat { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.gat button { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 9px 12px; display: grid; gap: 2px; }
+.gat button:hover { border-color: var(--ink-2); }
+.gat button span { font-size: 12.5px; color: var(--ink-2); }
+.gat button b { font-family: var(--f-mono); font-size: 15px; }
+
+#toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 500; max-width: calc(100% - 32px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+#toast.ver { opacity: 1; }
+
+@media (max-width: 860px) {
+  .ruta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pr, .not { grid-template-columns: minmax(0, 1fr); }
+  .not-izq { position: static; }
+  .pr .c3d, .not .c3d { width: min(100%, 210px); }
+  .leyenda { margin-left: 0; width: 100%; }
+}
+@media (max-width: 520px) {
+  .app { padding-inline: 16px; gap: 18px; }
+  .brand h1 { font-size: 19px; }
+  .tabs { width: 100%; } .tab { flex: 1; padding-inline: 8px; }
+  .etapa { padding: 10px 12px; } .etapa b { font-size: 15px; }
+  .casos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .caso { grid-template-columns: 52px minmax(0, 1fr); padding: 10px; } .caso svg { width: 52px; height: 52px; }
+  .pr { padding: 14px; } .mezcla { font-size: 18px; } .algo { font-size: 17px; }
+  .sesion li { grid-template-columns: minmax(0, 1fr) 60px 100px; }
+  dialog#detalle { width: 100%; }
+  .cara { min-height: 300px; padding: 18px 14px; } .fc-dg svg { width: min(58vw, 210px); } .dorso h2 { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+
+/* Escritorio: el detalle pasa a ventana amplia; la reproducción ocupa la columna grande y queda fija */
+@media (min-width: 861px) {
+  dialog#detalle { margin: auto; width: min(1220px, calc(100% - 32px)); height: calc(100% - 32px); max-height: calc(100% - 32px); border-radius: 16px; box-shadow: 0 24px 70px rgba(0,0,0,.4); }
+  .det { grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr); grid-template-areas: "play head" "play info"; grid-template-rows: auto 1fr; gap: 18px 26px; padding: 20px 24px; align-items: start; }
+  .det > .det-h { grid-area: head; } .det-play { grid-area: play; } .det-info { grid-area: info; }
+  .det-play { position: sticky; top: 0; height: calc(100vh - 72px); min-height: 460px; display: flex; flex-direction: column; gap: 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .det-play .escena { flex: 1 1 auto; min-height: 200px; container-type: size; padding: 0; }
+  .det-play .c3d { width: min(100cqw, 100cqh); }
+  .det-play .bloque { gap: 10px; }
+  .det-play .algo { font-size: 25px; gap: 2px 9px; }
+  .det-play .algo .trg { gap: 9px; }
+  .det-play .ctrl .btn { min-height: 46px; padding-inline: 16px; font-size: 15px; }
+  .det-play .ctrl .btn svg { width: 18px; height: 18px; }
+  .det-play .ctrl select { min-height: 46px; }
+  .teclas-hint { display: block; }
+  .pr { grid-template-columns: minmax(0, 420px) minmax(0, 1fr); }
+  .pr-izq .c3d { width: min(100%, 380px); }
+}
+
+/* ===== Selector de estilo ===== */
+.estilos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.estilo-b { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px; display: grid; gap: 3px; font-size: 12.5px; color: var(--ink-2); min-width: 0; }
+.estilo-b b { color: var(--ink); font-size: 14px; }
+.estilo-b[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.estilo-mues { display: flex; gap: 4px; padding: 7px; border-radius: 6px; margin-bottom: 4px; border: 1px solid rgba(127,127,127,.35); }
+.estilo-mues i { width: 18px; height: 18px; border-radius: 4px; }
+
+/* ===== Estilo: Cronómetro (siempre oscuro; pantallas LCD; menú lateral en escritorio) ===== */
+:root[data-estilo="crono"] {
+  --bg: #101215; --surface: #181b20; --surface-2: #1f232a; --ink: #e9ecef; --ink-2: #8d96a3; --line: #2a2f37;
+  --accent: #e5483f; --accent-ink: #ffffff; --accent-soft: #3a1d1b;
+  --ok: #4cc38a; --ok-soft: #14301f; --warn: #e6b450; --warn-soft: #3a2e12; --bad: #ff7a70; --bad-soft: #3d1a18;
+  --stage: #0b0d10; --cell-off: #3a414c; --cell-unk: #22272e; --lcd: #aebba3; --lcd-ink: #1b2219;
+  --f-display: "Chakra Petch", "Bahnschrift", "DIN Alternate", system-ui, sans-serif; --f-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --r: 6px; color-scheme: dark; }
+:root[data-estilo="crono"] #btn-tema { display: none; }
+:root[data-estilo="crono"] h2 { text-transform: uppercase; letter-spacing: .03em; }
+:root[data-estilo="crono"] .brand h1 { text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+:root[data-estilo="crono"] .tabs { border-radius: 8px; }
+:root[data-estilo="crono"] .tab { border-radius: 5px; font-family: var(--f-display); text-transform: uppercase; letter-spacing: .06em; font-size: 13px; }
+:root[data-estilo="crono"] .tab[aria-selected="true"] { background: var(--lcd); color: var(--lcd-ink); }
+:root[data-estilo="crono"] .crono { background: var(--lcd); color: var(--lcd-ink); border-radius: 8px; padding: 14px 22px; width: fit-content; font-family: var(--f-display); box-shadow: inset 0 3px 10px rgba(0,0,0,.25); }
+:root[data-estilo="crono"] .crono[data-f="running"] { color: var(--lcd-ink); }
+:root[data-estilo="crono"] .det-play .algo, :root[data-estilo="crono"] .revela .algo { background: var(--lcd); color: var(--lcd-ink); border-radius: 6px; padding: 8px 12px; box-shadow: inset 0 2px 8px rgba(0,0,0,.22); }
+:root[data-estilo="crono"] .det-play .algo .trg, :root[data-estilo="crono"] .revela .algo .trg { background: rgba(0,0,0,.08); border-bottom-color: var(--lcd-ink); }
+:root[data-estilo="crono"] .det-play .algo .mv.on, :root[data-estilo="crono"] .revela .algo .mv.on { background: var(--lcd-ink); color: var(--lcd); }
+:root[data-estilo="crono"] .det-play .algo .mv.hecho, :root[data-estilo="crono"] .revela .algo .mv.hecho { color: rgba(27,34,25,.45); }
+:root[data-estilo="crono"] .etapa b { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .02em; }
+:root[data-estilo="crono"] .caso .nm { font-family: var(--f-display); font-weight: 600; }
+:root[data-estilo="crono"] .etapa[aria-pressed="true"] { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); border-color: var(--line); }
+:root[data-estilo="crono"] .meter .m-ok { background: var(--lcd); }
+@media (min-width: 1000px) {
+  :root[data-estilo="crono"] .app { max-width: 1340px; display: grid; grid-template-columns: 212px minmax(0, 1fr); column-gap: 28px; row-gap: 18px; align-items: start; }
+  :root[data-estilo="crono"] .top { grid-column: 1; grid-row: 1 / span 30; position: sticky; top: calc(18px + env(safe-area-inset-top, 0px)); flex-direction: column; align-items: stretch; gap: 14px; padding: 16px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  :root[data-estilo="crono"] .brand { margin: 0 0 6px; align-items: flex-start; }
+  :root[data-estilo="crono"] .brand h1 { font-size: 16px; line-height: 1.2; min-width: 0; }
+  :root[data-estilo="crono"] .tabs { flex-direction: column; padding: 4px; }
+  :root[data-estilo="crono"] .tab { text-align: left; padding: 11px 12px; }
+  :root[data-estilo="crono"] .top .btn { justify-content: flex-start; }
+  :root[data-estilo="crono"] .app > section { grid-column: 2; }
+  :root[data-estilo="crono"] .ruta { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+/* ===== Estilo: Juguete pop (bordes gruesos, sombras duras, tarjetas grandes) ===== */
+:root[data-estilo="pop"] {
+  --bg: #eef6ff; --surface: #ffffff; --surface-2: #f3f8ff; --ink: #17142b; --ink-2: #57536f; --line: #17142b;
+  --accent: #ff7a00; --accent-ink: #17142b; --accent-soft: #ffeedb;
+  --stage: #d9eaff; --cell-off: #cdd5e3; --cell-unk: #e6ebf3;
+  --f-display: "Fredoka", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif; --f-body: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --r: 16px; --pop-shadow: 4px 4px 0 var(--line); }
+@media (prefers-color-scheme: dark) { :root[data-estilo="pop"]:not([data-theme="light"]) {
+  --bg: #1a1534; --surface: #251e47; --surface-2: #2d2554; --ink: #f5f2ff; --ink-2: #b9b1db; --line: #07050f;
+  --accent: #ffb020; --accent-ink: #1a1534; --accent-soft: #3d3014; --stage: #2d2554; --cell-off: #4a4272; --cell-unk: #2f2858; color-scheme: dark } }
+:root[data-estilo="pop"][data-theme="dark"] {
+  --bg: #1a1534; --surface: #251e47; --surface-2: #2d2554; --ink: #f5f2ff; --ink-2: #b9b1db; --line: #07050f;
+  --accent: #ffb020; --accent-ink: #1a1534; --accent-soft: #3d3014; --stage: #2d2554; --cell-off: #4a4272; --cell-unk: #2f2858; color-scheme: dark }
+:root[data-estilo="pop"] body { font-size: 15.5px; }
+:root[data-estilo="pop"] h2, :root[data-estilo="pop"] h3, :root[data-estilo="pop"] .brand h1, :root[data-estilo="pop"] .etapa b, :root[data-estilo="pop"] .caso .nm { font-weight: 700; }
+:root[data-estilo="pop"] :is(.etapa, .caso, .como, .pr, .vacio, .cara, .btn, .chip, .marca-b, .estilo-b, .alt, .seg, .not-izq, .gat button, .tecla, .sesion li, .pr-top select, .ctrl select, .campo input) { border: 2px solid var(--line); box-shadow: var(--pop-shadow); border-radius: var(--r); }
+:root[data-estilo="pop"] :is(.btn, .chip, .tecla, .seg, .ctrl select, .pr-top select, .campo input) { border-radius: 12px; }
+:root[data-estilo="pop"] :is(.etapa, .caso, .btn, .chip, .tecla, .gat button, .marca-b, .estilo-b, .alt):hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--line); }
+:root[data-estilo="pop"] :is(.etapa, .caso, .btn, .chip, .tecla, .gat button, .marca-b, .estilo-b, .alt):active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--line); }
+:root[data-estilo="pop"] .top { gap: 14px; }
+:root[data-estilo="pop"] .brand h1 { font-size: 26px; }
+:root[data-estilo="pop"] .logo { transform: rotate(-8deg); border-radius: 7px; }
+:root[data-estilo="pop"] .tabs { order: 5; width: 100%; background: transparent; border: 0; padding: 0; gap: 10px; }
+:root[data-estilo="pop"] .tab { flex: 1; border: 2px solid var(--line); background: var(--surface); box-shadow: var(--pop-shadow); border-radius: 14px; font-family: var(--f-display); font-size: 17px; padding: 10px 8px; color: var(--ink); }
+:root[data-estilo="pop"] .tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+:root[data-estilo="pop"] .etapa { border-top-width: 10px; }
+:root[data-estilo="pop"] .meter { background: var(--cell-off); height: 8px; border-radius: 4px; }
+:root[data-estilo="pop"] .etapa:nth-child(1), :root[data-estilo="pop"] .etapa:nth-child(4) { border-top-color: var(--cu-F); }
+:root[data-estilo="pop"] .etapa:nth-child(2), :root[data-estilo="pop"] .etapa:nth-child(6) { border-top-color: var(--cu-U); }
+:root[data-estilo="pop"] .etapa:nth-child(3), :root[data-estilo="pop"] .etapa:nth-child(5) { border-top-color: var(--cu-L); }
+:root[data-estilo="pop"] .etapa[aria-pressed="true"] { background: var(--accent-soft); box-shadow: 6px 6px 0 var(--line); }
+:root[data-estilo="pop"] .casos { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+:root[data-estilo="pop"] .caso { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 16px 12px; }
+:root[data-estilo="pop"] .caso svg { width: 96px; height: 96px; }
+:root[data-estilo="pop"] .caso .nm { padding: 0; font-size: 18px; }
+:root[data-estilo="pop"] .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+:root[data-estilo="pop"] .escena { border: 2px solid var(--line); }
+:root[data-estilo="pop"] dialog#detalle, :root[data-estilo="pop"] dialog#ajustes { border: 3px solid var(--line); }
+:root[data-estilo="pop"] .crono { font-family: var(--f-display); font-weight: 700; }
+@media (max-width: 520px) { :root[data-estilo="pop"] .casos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } :root[data-estilo="pop"] .caso svg { width: 76px; height: 76px; } :root[data-estilo="pop"] .tab { font-size: 15px; padding: 9px 4px; } }
+
+/* ===== Estilo: Minimal compacto (denso; casos en lista; pestañas subrayadas) ===== */
+:root[data-estilo="mini"] {
+  --bg: #f7f7f5; --surface: #ffffff; --surface-2: #f1f1ee; --ink: #1c1c1a; --ink-2: #6b6b66; --line: #e2e2dd;
+  --accent: #0f766e; --accent-ink: #ffffff; --accent-soft: #e0f2ef; --stage: #efefec;
+  --f-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r: 4px; }
+@media (prefers-color-scheme: dark) { :root[data-estilo="mini"]:not([data-theme="light"]) {
+  --bg: #161615; --surface: #1d1d1b; --surface-2: #242422; --ink: #e7e7e3; --ink-2: #9a9a94; --line: #2f2f2c;
+  --accent: #2dd4bf; --accent-ink: #0b1f1c; --accent-soft: #12302c; --stage: #222220; --cell-off: #44443f; --cell-unk: #2a2a27; color-scheme: dark } }
+:root[data-estilo="mini"][data-theme="dark"] {
+  --bg: #161615; --surface: #1d1d1b; --surface-2: #242422; --ink: #e7e7e3; --ink-2: #9a9a94; --line: #2f2f2c;
+  --accent: #2dd4bf; --accent-ink: #0b1f1c; --accent-soft: #12302c; --stage: #222220; --cell-off: #44443f; --cell-unk: #2a2a27; color-scheme: dark }
+:root[data-estilo="mini"] body { font-size: 13.5px; }
+:root[data-estilo="mini"] .app { max-width: 1280px; gap: 14px; padding-block: 12px 40px; }
+:root[data-estilo="mini"] h2 { font-size: 18px; font-weight: 600; }
+:root[data-estilo="mini"] h3 { font-size: 14px; font-weight: 600; }
+:root[data-estilo="mini"] .brand h1 { font-size: 17px; font-weight: 600; }
+:root[data-estilo="mini"] .logo { grid-template-columns: repeat(3, 6px); gap: 1px; padding: 2px; border-radius: 3px; }
+:root[data-estilo="mini"] .logo i { width: 6px; height: 6px; }
+:root[data-estilo="mini"] .tabs { background: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 0; gap: 0; }
+:root[data-estilo="mini"] .tab { border-radius: 0; padding: 7px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
+:root[data-estilo="mini"] .tab[aria-selected="true"] { background: none; color: var(--ink); border-bottom-color: var(--accent); }
+:root[data-estilo="mini"] .btn { min-height: 32px; padding: 5px 11px; border-radius: 4px; font-weight: 500; }
+:root[data-estilo="mini"] .ruta { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+:root[data-estilo="mini"] .etapa { padding: 8px 10px; gap: 4px; border-radius: 4px; }
+:root[data-estilo="mini"] .etapa b { font-size: 13.5px; font-weight: 600; }
+:root[data-estilo="mini"] .etapa .eyebrow { font-size: 10.5px; }
+:root[data-estilo="mini"] .meter { height: 3px; }
+:root[data-estilo="mini"] .como { padding: 10px 14px; border-radius: 4px; }
+:root[data-estilo="mini"] .chip { border-radius: 4px; padding: 3px 9px; font-size: 12.5px; }
+:root[data-estilo="mini"] #lista { gap: 16px; }
+:root[data-estilo="mini"] .grupo { gap: 6px; }
+:root[data-estilo="mini"] .casos { grid-template-columns: minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); overflow: hidden; }
+:root[data-estilo="mini"] .caso { grid-template-columns: 34px minmax(130px, 220px) 12px minmax(0, 1fr); grid-template-rows: auto; align-items: center; gap: 0 14px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 5px 12px; }
+:root[data-estilo="mini"] .caso:last-child { border-bottom: 0; }
+:root[data-estilo="mini"] .caso:hover { background: var(--surface-2); }
+:root[data-estilo="mini"] .caso svg { width: 34px; height: 34px; }
+:root[data-estilo="mini"] .caso .nm { font-family: var(--f-body); font-size: 13.5px; font-weight: 600; padding: 0; display: flex; gap: 8px; align-items: baseline; }
+:root[data-estilo="mini"] .caso .ap { margin: 0; font-weight: 400; }
+:root[data-estilo="mini"] .caso .dot { position: static; }
+:root[data-estilo="mini"] .caso .alg { grid-column: auto; font-size: 12.5px; color: var(--ink); }
+:root[data-estilo="mini"] .pr, :root[data-estilo="mini"] .cara, :root[data-estilo="mini"] .not-izq, :root[data-estilo="mini"] .vacio { border-radius: 4px; box-shadow: none; }
+:root[data-estilo="mini"] .crono { font-size: clamp(42px, 7vw, 68px); }
+:root[data-estilo="mini"] .escena { border-radius: 4px; }
+:root[data-estilo="mini"] dialog#detalle, :root[data-estilo="mini"] dialog#ajustes { border-radius: 6px; }
+:root[data-estilo="mini"] .algo { font-size: 17px; }
+@media (max-width: 860px) { :root[data-estilo="mini"] .ruta { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) {
+  :root[data-estilo="mini"] .ruta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root[data-estilo="mini"] .caso { grid-template-columns: 30px minmax(0, 1fr) 12px; row-gap: 2px; }
+  :root[data-estilo="mini"] .caso svg { width: 30px; height: 30px; grid-row: span 2; }
+  :root[data-estilo="mini"] .caso .alg { grid-column: 2 / -1; }
+  :root[data-estilo="mini"] .tab { flex: 1; padding-inline: 4px; }
+}
+
+/* Escritorio: algoritmo grande bajo el cubo en la ficha, en todos los estilos */
+@media (min-width: 861px) {
+  :root[data-estilo] .det-play .algo { font-size: 36px; line-height: 1.6; gap: 4px 13px; }
+  :root[data-estilo] .det-play .algo .trg { gap: 13px; padding: 0 7px; border-bottom-width: 3px; }
+  :root[data-estilo] .det-play .algo .mv { padding: 0 4px; border-radius: 6px; }
+}
+
+/* Secciones dentro de las pantallas LCD del estilo Cronómetro */
+:root[data-estilo="crono"] .det-play .algo .grp, :root[data-estilo="crono"] .revela .algo .grp { background: rgba(0, 0, 0, .06); border-color: rgba(27, 34, 25, .38); color: var(--lcd-ink); }
+:root[data-estilo="crono"] .det-play .algo .grp::before, :root[data-estilo="crono"] .revela .algo .grp::before { color: var(--lcd-ink); opacity: .65; }
+:root[data-estilo="crono"] .det-play .algo .grp:hover, :root[data-estilo="crono"] .revela .algo .grp:hover { border-color: var(--lcd-ink); }
+:root[data-estilo="crono"] .det-play .algo.editando, :root[data-estilo="crono"] .det-play .algo.editando .mv { color: var(--lcd-ink); }
+:root[data-estilo="crono"] .det-play .algo.editando .corte::after { border-left-color: rgba(27, 34, 25, .35); }
+:root[data-estilo="crono"] .det-play .algo.editando .corte.on::after { border-left-color: var(--accent); }
+:root[data-estilo="crono"] .det-play .algo.editando .corte:hover { background: rgba(0, 0, 0, .08); }
+
+:root[data-estilo="crono"] .det-play .algo .trg-n, :root[data-estilo="crono"] .revela .algo .trg-n { color: var(--lcd-ink); opacity: .75; }
+:root[data-estilo="pop"] .trig-fila input { border: 2px solid var(--line); border-radius: 10px; }
+
+/* Cronómetro: la pantalla LCD tiene su propio relleno; deja espacio para el nombre del movimiento */
+:root[data-estilo="crono"] .det-play .algo.con-nombres, :root[data-estilo="crono"] .revela .algo.con-nombres,
+:root[data-estilo="crono"] .det-play .algo.con-grupos:has(.grp-trg), :root[data-estilo="crono"] .revela .algo.con-grupos:has(.grp-trg) { padding-bottom: calc(max(15px, .52em) + 10px); }
+
+/* Escritorio: el panel del cubo crece si el algoritmo ocupa varias líneas, en vez de desbordarse */
+@media (min-width: 861px) {
+  :root[data-estilo] .det-play { height: auto; min-height: 0; }
+  :root[data-estilo] .det-play .escena { flex: none; min-height: 190px; }
+}
+</style>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <h1>Entrenador OLL y PLL</h1>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Secciones">
+      <button class="tab" role="tab" id="tab-casos" data-v="casos" aria-selected="true">Casos</button>
+      <button class="tab" role="tab" id="tab-practicar" data-v="practicar" aria-selected="false">Practicar</button>
+      <button class="tab" role="tab" id="tab-tarjetas" data-v="tarjetas" aria-selected="false">Tarjetas</button>
+      <button class="tab" role="tab" id="tab-notacion" data-v="notacion" aria-selected="false">Notación</button>
+    </div>
+    <button class="btn sm" id="btn-cubo">Personalizar</button>
+    <button class="btn sm" id="btn-tema"></button>
+    <p class="sync" id="sync" data-s="local">Progreso guardado en este navegador</p>
+  </header>
+
+  <section id="v-casos" class="vista" role="tabpanel" aria-labelledby="tab-casos">
+    <div class="ruta" id="ruta"></div>
+    <div class="como" id="como"></div>
+    <div class="filtros" id="filtros"></div>
+    <div id="lista" class="vista"></div>
+  </section>
+
+  <section id="v-practicar" class="vista" hidden role="tabpanel" aria-labelledby="tab-practicar">
+    <div class="vista">
+      <div class="pr-top">
+        <label for="pr-set">Qué practicar
+          <select id="pr-set"></select>
+        </label>
+        <label class="check" for="pr-auf"><input type="checkbox" id="pr-auf"> Mostrar el caso desde un ángulo al azar</label>
+      </div>
+      <ol class="pasos">
+        <li>Arma el caso en tu cubo con la mezcla.</li>
+        <li>Pulsa <kbd>Espacio</kbd> y haz el algoritmo de memoria.</li>
+        <li>Detén el cronómetro y evalúate.</li>
+      </ol>
+      <div id="pr-cuerpo"></div>
+      <div class="sesion" id="sesion"></div>
+    </div>
+  </section>
+
+  <section id="v-tarjetas" class="vista" hidden role="tabpanel" aria-labelledby="tab-tarjetas">
+    <div class="pr-top">
+      <label for="fc-set">Qué tarjetas
+        <select id="fc-set"></select>
+      </label>
+      <label class="check" for="fc-girar"><input type="checkbox" id="fc-girar"> Girar los casos de OLL y PLL al azar</label>
+    </div>
+    <p class="nota">Mira el caso y trata de recordar el algoritmo. Toca la tarjeta (o pulsa <kbd>Espacio</kbd>) para darla vuelta y comprobarlo.</p>
+    <div class="fc" id="fc-cuerpo"></div>
+    <p class="nota fc-ses" id="fc-sesion" role="status"></p>
+  </section>
+
+  <section id="v-notacion" hidden role="tabpanel" aria-labelledby="tab-notacion">
+    <div class="not">
+      <div class="not-izq">
+        <div class="escena"><div id="not-cubo"></div></div>
+        <p class="lectura" id="not-lee">Toca una letra para ver el giro en el cubo.</p>
+        <div class="bajo-cubo"><span>Blanco arriba, verde al frente</span><button class="btn sm" id="not-reset">Dejarlo resuelto</button></div>
+      </div>
+      <div class="not-der" id="not-der"></div>
+    </div>
+  </section>
+</div>
+<dialog id="ajustes" aria-labelledby="aj-titulo"><div class="aj" id="aj"></div></dialog>
+<dialog id="detalle" aria-labelledby="det-nombre"><div class="det" id="det"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+/* Motor del cubo: estado por pegatinas (posición + normal + color). Ejes: x→derecha (R), y→arriba (U), z→frente (F). */
+var Cube = (function () {
+  var FACE_N = { U: [0, 1, 0], D: [0, -1, 0], R: [1, 0, 0], L: [-1, 0, 0], F: [0, 0, 1], B: [0, 0, -1] };
+  var FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B'];
+  var MOVES = {
+    R: { a: 0, l: [1], d: -1 }, L: { a: 0, l: [-1], d: 1 }, M: { a: 0, l: [0], d: 1 },
+    r: { a: 0, l: [0, 1], d: -1 }, l: { a: 0, l: [-1, 0], d: 1 }, x: { a: 0, l: [-1, 0, 1], d: -1 },
+    U: { a: 1, l: [1], d: -1 }, D: { a: 1, l: [-1], d: 1 }, E: { a: 1, l: [0], d: 1 },
+    u: { a: 1, l: [0, 1], d: -1 }, d: { a: 1, l: [-1, 0], d: 1 }, y: { a: 1, l: [-1, 0, 1], d: -1 },
+    F: { a: 2, l: [1], d: -1 }, B: { a: 2, l: [-1], d: 1 }, S: { a: 2, l: [0], d: -1 },
+    f: { a: 2, l: [0, 1], d: -1 }, b: { a: 2, l: [-1, 0], d: 1 }, z: { a: 2, l: [-1, 0, 1], d: -1 }
+  };
+  function rot(v, a, d) {
+    var x = v[0], y = v[1], z = v[2];
+    if (a === 0) return d < 0 ? [x, z, -y] : [x, -z, y];
+    if (a === 1) return d < 0 ? [-z, y, x] : [z, y, -x];
+    return d < 0 ? [y, -x, z] : [-y, x, z];
+  }
+  function solved() {
+    var st = [];
+    FACE_ORDER.forEach(function (f) {
+      var n = FACE_N[f];
+      for (var x = -1; x <= 1; x++) for (var y = -1; y <= 1; y++) for (var z = -1; z <= 1; z++) {
+        if (x * n[0] + y * n[1] + z * n[2] === 1) st.push({ p: [x, y, z], n: n.slice(), c: f });
+      }
+    });
+    return st;
+  }
+  function clone(st) { return st.map(function (s) { return { p: s.p.slice(), n: s.n.slice(), c: s.c }; }); }
+  /* alg → [{b:'R', t:1|2|3}]  (t = cuartos de giro en el sentido base) */
+  function parse(alg) {
+    var out = [], re = /([RLUDFBMESrludfbxyz])(w?)(['’]?)([23]?)(['’]?)/g, m;
+    var s = String(alg || '').replace(/[()\[\]]/g, ' ');
+    while ((m = re.exec(s))) {
+      var b = m[1];
+      if (m[2]) b = b.toLowerCase();
+      var t = m[4] ? parseInt(m[4], 10) : 1;
+      if (m[3] || m[5]) t = (4 - t) % 4;
+      if (t) out.push({ b: b, t: t });
+    }
+    return out;
+  }
+  function tok(m) { return m.b + (m.t === 2 ? '2' : m.t === 3 ? "'" : ''); }
+  function str(ms) { return ms.map(tok).join(' '); }
+  function invert(ms) { return ms.slice().reverse().map(function (m) { return { b: m.b, t: (4 - m.t) % 4 }; }); }
+  function applyMove(st, m) {
+    var def = MOVES[m.b];
+    for (var k = 0; k < m.t; k++) {
+      for (var i = 0; i < st.length; i++) {
+        var s = st[i];
+        if (def.l.indexOf(s.p[def.a]) >= 0) { s.p = rot(s.p, def.a, def.d); s.n = rot(s.n, def.a, def.d); }
+      }
+    }
+    return st;
+  }
+  function apply(st, ms) { if (typeof ms === 'string') ms = parse(ms); ms.forEach(function (m) { applyMove(st, m); }); return st; }
+  function key(p, n) { return p.join(',') + '|' + n.join(','); }
+  function index(st) { var o = {}; st.forEach(function (s) { o[key(s.p, s.n)] = s.c; }); return o; }
+  var SLOTS = solved().map(function (s) { return key(s.p, s.n); });
+  function serialize(st) { var ix = index(st); return SLOTS.map(function (k) { return ix[k]; }).join(''); }
+  var SOLVED_STR = serialize(solved());
+  function faceOfNormal(n) { for (var f in FACE_N) { var v = FACE_N[f]; if (v[0] === n[0] && v[1] === n[1] && v[2] === n[2]) return f; } }
+  function centersOk(st) { return st.every(function (s) { return (Math.abs(s.p[0]) + Math.abs(s.p[1]) + Math.abs(s.p[2]) !== 1) || s.c === faceOfNormal(s.n); }); }
+  function f2lOk(st) { return st.every(function (s) { return s.p[1] > 0 || s.c === faceOfNormal(s.n); }); }
+  function topOriented(st) { return st.every(function (s) { return s.n[1] !== 1 || s.c === 'U'; }); }
+  var ORIENTS = (function () {
+    var res = [], seen = {};
+    ['', 'x', 'x2', "x'", 'z', "z'"].forEach(function (a) {
+      ['', 'y', 'y2', "y'"].forEach(function (b) {
+        var s = (a + ' ' + b).trim(), k = serialize(apply(solved(), s));
+        if (!seen[k]) { seen[k] = 1; res.push(s); }
+      });
+    });
+    return res;
+  })();
+  /* Estado del caso: el cubo (centros estándar) que el algoritmo deja resuelto. pre/post = ajustes de U opcionales */
+  function caseState(alg, pre, post) {
+    var inv = invert(parse(alg));
+    for (var i = 0; i < ORIENTS.length; i++) {
+      var st = solved();
+      if (pre) apply(st, pre);
+      apply(st, ORIENTS[i]); apply(st, inv);
+      if (centersOk(st)) { if (post) apply(st, post); return { state: st, prefix: ORIENTS[i] }; }
+    }
+    return null;
+  }
+  function ollSig(st) {
+    var pts = st.filter(function (s) { return s.p[1] === 1 && s.c === 'U' && !(s.p[0] === 0 && s.p[2] === 0); });
+    var best = null, all = {};
+    for (var k = 0; k < 4; k++) {
+      var sig = pts.map(function (s) {
+        var p = s.p, n = s.n;
+        for (var j = 0; j < k; j++) { p = rot(p, 1, -1); n = rot(n, 1, -1); }
+        return key(p, n);
+      }).sort().join(';');
+      all[sig] = 1;
+      if (best === null || sig < best) best = sig;
+    }
+    return { sig: best, count: Object.keys(all).length };
+  }
+  function pllSig(alg) {
+    var best = null, all = {}, U = ['', 'U', 'U2', "U'"];
+    for (var a = 0; a < 4; a++) for (var b = 0; b < 4; b++) {
+      var cs = caseState(alg, U[a], U[b]); if (!cs) return null;
+      var s = serialize(cs.state); all[s] = 1;
+      if (best === null || s < best) best = s;
+    }
+    return { sig: best, count: Object.keys(all).length };
+  }
+
+
+  /* Convierte un algoritmo con giros de cubo (x y z), capas anchas (r u f…) y capas medias (M E S)
+     en uno equivalente solo con caras, visto desde la posición inicial del cubo. */
+  var EQ = { d: [['U', 1], ['y', 3]], u: [['D', 1], ['y', 1]], r: [['L', 1], ['x', 1]], l: [['R', 1], ['x', 3]], f: [['B', 1], ['z', 1]], b: [['F', 1], ['z', 3]],
+    M: [['R', 1], ['L', 3], ['x', 3]], E: [['U', 1], ['D', 3], ['y', 3]], S: [['F', 3], ['B', 1], ['z', 1]] };
+  function derotate(ms) {
+    var map = { U: 'U', D: 'D', R: 'R', L: 'L', F: 'F', B: 'B' }, out = [];
+    function rotate(b) {
+      var def = MOVES[b], nm = {};
+      for (var s in FACE_N) nm[faceOfNormal(rot(FACE_N[s], def.a, def.d))] = map[s];
+      map = nm;
+    }
+    ms.forEach(function (m) {
+      for (var k = 0; k < m.t; k++) {
+        var seq = EQ[m.b] || [[m.b, 1]];
+        seq.forEach(function (q) {
+          for (var j = 0; j < q[1]; j++) {
+            if ('xyz'.indexOf(q[0]) >= 0) rotate(q[0]);
+            else out.push({ b: map[q[0]], t: 1 });
+          }
+        });
+      }
+    });
+    var r = [];
+    out.forEach(function (m) { var l = r[r.length - 1]; if (l && l.b === m.b) { l.t = (l.t + m.t) % 4; if (!l.t) r.pop(); } else r.push({ b: m.b, t: m.t }); });
+    return r;
+  }
+  /* ---- F2L ---- */
+  function posKey(p) { return p.join(','); }
+  function piecesAt(st) { var m = {}; st.forEach(function (s) { var k = posKey(s.p); (m[k] = m[k] || []).push(s); }); return m; }
+  function solvedAt(m, p) { return m[posKey(p)].every(function (s) { return s.c === faceOfNormal(s.n); }); }
+  var CROSS = [[0, -1, 1], [0, -1, -1], [1, -1, 0], [-1, -1, 0]], DC = [[1, -1, 1], [-1, -1, 1], [-1, -1, -1], [1, -1, -1]], MID = [[1, 0, 1], [-1, 0, 1], [-1, 0, -1], [1, 0, -1]];
+  function homeColors(p) { var c = []; if (p[1]) c.push(p[1] > 0 ? 'U' : 'D'); if (p[2]) c.push(p[2] > 0 ? 'F' : 'B'); if (p[0]) c.push(p[0] > 0 ? 'R' : 'L'); return c; }
+  function findPiece(st, colors) {
+    var m = piecesAt(st);
+    for (var k in m) { var a = m[k]; if (a.length === colors.length && colors.every(function (c) { return a.some(function (s) { return s.c === c; }); })) { var s0 = a.filter(function (s) { return s.c === colors[0]; })[0]; return { p: s0.p, n: s0.n }; } }
+  }
+  function pieceSig(st, colors) { var f = findPiece(st, colors); return posKey(f.p) + '/' + posKey(f.n); }
+  function uCanon(st, fn) { var best = null; ['', 'U', 'U2', "U'"].forEach(function (u) { var v = fn(apply(clone(st), u)); if (best === null || v < best) best = v; }); return best; }
+  function checkF2L(alg, kind) {
+    var cs = caseState(alg); if (!cs) return { ok: false, why: 'centros' };
+    var end = apply(clone(cs.state), parse(alg)); if (!centersOk(end)) return { ok: false, why: 'centros' };
+    var m = piecesAt(cs.state), me = piecesAt(end);
+    function all(mm, list) { return list.every(function (p) { return solvedAt(mm, p); }); }
+    var F2L = CROSS.concat(DC, MID);
+    if (kind === 'f2l') {
+      if (!all(m, CROSS.concat(DC.slice(1), MID.slice(1)))) return { ok: false, why: 'desarma otras piezas' };
+      if (!all(me, F2L)) return { ok: false, why: 'no resuelve' };
+      if (solvedAt(m, DC[0]) && solvedAt(m, MID[0])) return { ok: false, why: 'resuelto' };
+      return { ok: true, cs: cs, sig: uCanon(cs.state, function (s) { return pieceSig(s, ['D', 'F', 'R']) + '|' + pieceSig(s, ['F', 'R']); }) };
+    }
+    if (kind === 'f2lc') {
+      if (!all(m, CROSS.concat(DC.slice(1)))) return { ok: false, why: 'desarma otras piezas' };
+      if (!all(me, CROSS.concat(DC))) return { ok: false, why: 'no resuelve' };
+      if (solvedAt(m, DC[0])) return { ok: false, why: 'resuelto' };
+      return { ok: true, cs: cs, sig: uCanon(cs.state, function (s) { return pieceSig(s, ['D', 'F', 'R']); }) };
+    }
+    /* f2le: una sola arista de la capa del medio fuera de su sitio */
+    if (!all(m, CROSS.concat(DC))) return { ok: false, why: 'desarma la primera capa' };
+    var off = MID.filter(function (p) { return !solvedAt(m, p); });
+    if (off.length !== 1) return { ok: false, why: 'mueve otras aristas' };
+    if (!all(me, F2L)) return { ok: false, why: 'no resuelve' };
+    var hc = homeColors(off[0]).filter(function (c) { return c !== 'D' && c !== 'U'; });
+    return { ok: true, cs: cs, target: off[0], sig: posKey(off[0]) + '#' + uCanon(cs.state, function (s) { return pieceSig(s, hc); }) };
+  }
+  /* Comprueba un algoritmo. kind: 'oll' | 'pll' | 'eo' (solo orienta aristas) */
+  function check(alg, kind) {
+    alg = str(derotate(parse(alg)));
+    if (kind === 'f2l' || kind === 'f2lc' || kind === 'f2le') return checkF2L(alg, kind);
+    var cs = caseState(alg);
+    if (!cs) return { ok: false, why: 'centros' };
+    if (!f2lOk(cs.state)) return { ok: false, why: 'f2l' };
+    var end = apply(clone(cs.state), cs.prefix ? invert(parse(cs.prefix)) : []);
+    if (kind === 'eo') {
+      var eoOk = cs.state.some(function (s) { return s.p[1] === 1 && s.n[1] === 1 && (Math.abs(s.p[0]) + Math.abs(s.p[2]) === 1) && s.c !== 'U'; });
+      return { ok: eoOk, cs: cs, why: eoOk ? '' : 'no cambia aristas' };
+    }
+    if (kind === 'oll') {
+      if (topOriented(cs.state)) return { ok: false, why: 'ya orientado' };
+      var o = ollSig(cs.state); return { ok: true, cs: cs, sig: o.sig, count: o.count };
+    }
+    if (!topOriented(cs.state)) return { ok: false, why: 'no orientado' };
+    if (serialize(cs.state) === SOLVED_STR) return { ok: false, why: 'resuelto' };
+    var p = pllSig(alg); return { ok: true, cs: cs, sig: p.sig, count: p.count };
+  }
+  return { FACE_N: FACE_N, MOVES: MOVES, rot: rot, solved: solved, clone: clone, parse: parse, tok: tok, str: str, invert: invert,
+    applyMove: applyMove, apply: apply, key: key, index: index, serialize: serialize, SOLVED_STR: SOLVED_STR, faceOfNormal: faceOfNormal,
+    centersOk: centersOk, f2lOk: f2lOk, topOriented: topOriented, caseState: caseState, ollSig: ollSig, pllSig: pllSig, check: check, derotate: derotate, piecesAt: piecesAt, solvedAt: solvedAt, findPiece: findPiece, homeColors: homeColors, CROSS: CROSS, DC: DC, MID: MID };
+})();
+
+/* Casos. g = grupo, e = etapa de la ruta (1..4), a = algoritmo principal, alt = alternativas, n = apodo */
+var CASES = [
+  /* ---- OLL en 2 pasos: primero la cruz (3 casos, las esquinas no importan) ---- */
+  { id: 'EO-L', set: 'EO', name: 'Cruz · forma de L', g: 'cruz2', e: 2, a: "f R U R' U' f'" , alt: ["F U R U' R' F'"]},
+  { id: 'EO-I', set: 'EO', name: 'Cruz · línea', g: 'cruz2', e: 2, a: "F R U R' U' F'" },
+  { id: 'EO-P', set: 'EO', name: 'Cruz · punto', g: 'cruz2', e: 2, a: "F R U R' U' F' f R U R' U' f'" },
+  /* ---- OLL ---- */
+  { id: 'OLL1', n: '', g: 'punto', e: 6, a: "R U2 R2 F R F' U2 R' F R F'" },
+  { id: 'OLL2', n: '', g: 'punto', e: 6, a: "r U r' U2 r U2 R' U2 R U' r'", alt: ["F R U R' U' F' f R U R' U' f'", "F R U R' U' S R U R' U' f'"] },
+  { id: 'OLL3', n: '', g: 'punto', e: 6, a: "r' R2 U R' U r U2 r' U M'", alt: ["f R U R' U' f' U' F R U R' U' F'"] },
+  { id: 'OLL4', n: '', g: 'punto', e: 6, a: "M U' r U2 r' U' R U' R' M'", alt: ["f R U R' U' f' U F R U R' U' F'"] },
+  { id: 'OLL5', n: '', g: 'cuadrado', e: 6, a: "l' U2 L U L' U l", alt: ["r' U2 R U R' U r"] },
+  { id: 'OLL6', n: '', g: 'cuadrado', e: 6, a: "r U2 R' U' R U' r'" },
+  { id: 'OLL7', n: '', g: 'rayo', e: 6, a: "r U R' U R U2 r'" },
+  { id: 'OLL8', n: '', g: 'rayo', e: 6, a: "l' U' L U' L' U2 l", alt: ["r' U' R U' R' U2 r"] },
+  { id: 'OLL9', n: '', g: 'pez', e: 6, a: "R U R' U' R' F R2 U R' U' F'" },
+  { id: 'OLL10', n: '', g: 'pez', e: 6, a: "R U R' U R' F R F' R U2 R'" },
+  { id: 'OLL11', n: '', g: 'rayo', e: 6, a: "r U R' U R' F R F' R U2 r'" },
+  { id: 'OLL12', n: '', g: 'rayo', e: 6, a: "M' R' U' R U' R' U2 R U' R r'" },
+  { id: 'OLL13', n: '', g: 'caballo', e: 6, a: "F U R U' R2 F' R U R U' R'", alt: ["F U R U2 R' U' R U R' F'"] },
+  { id: 'OLL14', n: '', g: 'caballo', e: 6, a: "R' F R U R' F' R F U' F'" },
+  { id: 'OLL15', n: '', g: 'caballo', e: 6, a: "l' U' l L' U' L U l' U l", alt: ["r' U' r R' U' R U r' U r"] },
+  { id: 'OLL16', n: '', g: 'caballo', e: 6, a: "r U r' R U R' U' r U' r'" },
+  { id: 'OLL17', n: '', g: 'punto', e: 6, a: "F R' F' R2 r' U R U' R' U' M'", alt: ["R U R' U R' F R F' U2 R' F R F'"] },
+  { id: 'OLL18', n: '', g: 'punto', e: 6, a: "r U R' U R U2 r2 U' R U' R' U2 r", alt: ["R U2 R2 F R F' U2 M' U R U' r'"] },
+  { id: 'OLL19', n: '', g: 'punto', e: 6, a: "r' R U R U R' U' M' R' F R F'", alt: ["S' R U R' S U' R' F R F'"] },
+  { id: 'OLL20', n: '', g: 'punto', e: 6, a: "r U R' U' M2 U R U' R' U' M'", alt: ["S' R U R' S U' M' U R U' r'"] },
+  { id: 'OLL21', n: 'H', g: 'cruz', e: 2, a: "R U2 R' U' R U R' U' R U' R'", alt: ["R U R' U R U' R' U R U2 R'", "F R U R' U' R U R' U' R U R' U' F'"] },
+  { id: 'OLL22', n: 'Pi', g: 'cruz', e: 2, a: "R U2 R2 U' R2 U' R2 U2 R" },
+  { id: 'OLL23', n: 'Faros', g: 'cruz', e: 2, a: "R2 D' R U2 R' D R U2 R", alt: ["R2 D R' U2 R D' R' U2 R'"] },
+  { id: 'OLL24', n: 'Camaleón', g: 'cruz', e: 2, a: "r U R' U' r' F R F'" },
+  { id: 'OLL25', n: 'Corbata', g: 'cruz', e: 2, a: "F' r U R' U' r' F R", alt: ["F R' F' r U R U' r'"] },
+  { id: 'OLL26', n: 'Antisune', g: 'cruz', e: 2, a: "R U2 R' U' R U' R'", alt: ["R' U' R U' R' U2 R", "L' U' L U' L' U2 L"] },
+  { id: 'OLL27', n: 'Sune', g: 'cruz', e: 2, a: "R U R' U R U2 R'", alt: ["R' U2 R U R' U R"] },
+  { id: 'OLL28', n: '', g: 'esquinas', e: 6, a: "r U R' U' r' R U R U' R'" },
+  { id: 'OLL29', n: '', g: 'incomodo', e: 6, a: "R U R' U' R U' R' F' U' F R U R'" },
+  { id: 'OLL30', n: '', g: 'incomodo', e: 6, a: "F R' F R2 U' R' U' R U R' F2" },
+  { id: 'OLL31', n: '', g: 'p', e: 6, a: "R' U' F U R U' R' F' R" },
+  { id: 'OLL32', n: '', g: 'p', e: 6, a: "L U F' U' L' U L F L'", alt: ["S R U R' U' R' F R f'"] },
+  { id: 'OLL33', n: '', g: 't', e: 6, a: "R U R' U' R' F R F'" },
+  { id: 'OLL34', n: '', g: 'c', e: 6, a: "R U R2 U' R' F R U R U' F'" },
+  { id: 'OLL35', n: '', g: 'pez', e: 6, a: "R U2 R2 F R F' R U2 R'" },
+  { id: 'OLL36', n: '', g: 'w', e: 6, a: "L' U' L U' L' U L U L F' L' F" },
+  { id: 'OLL37', n: '', g: 'pez', e: 6, a: "F R' F' R U R U' R'" },
+  { id: 'OLL38', n: '', g: 'w', e: 6, a: "R U R' U R U' R' U' R' F R F'" },
+  { id: 'OLL39', n: '', g: 'rayo', e: 6, a: "L F' L' U' L U F U' L'" },
+  { id: 'OLL40', n: '', g: 'rayo', e: 6, a: "R' F R U R' U' F' U R" },
+  { id: 'OLL41', n: '', g: 'incomodo', e: 6, a: "R U R' U R U2 R' F R U R' U' F'" },
+  { id: 'OLL42', n: '', g: 'incomodo', e: 6, a: "R' U' R U' R' U2 R F R U R' U' F'" },
+  { id: 'OLL43', n: '', g: 'p', e: 6, a: "F' U' L' U L F", alt: ["R' U' F' U F R"] },
+  { id: 'OLL44', n: '', g: 'p', e: 6, a: "F U R U' R' F'", alt: ["f R U R' U' f'"] },
+  { id: 'OLL45', n: '', g: 't', e: 6, a: "F R U R' U' F'" },
+  { id: 'OLL46', n: '', g: 'c', e: 6, a: "R' U' R' F R F' U R" },
+  { id: 'OLL47', n: '', g: 'l', e: 6, a: "R' U' R' F R F' R' F R F' U R", alt: ["F' L' U' L U L' U' L U F"] },
+  { id: 'OLL48', n: '', g: 'l', e: 6, a: "F R U R' U' R U R' U' F'" },
+  { id: 'OLL49', n: '', g: 'l', e: 6, a: "r U' r2 U r2 U r2 U' r" },
+  { id: 'OLL50', n: '', g: 'l', e: 6, a: "r' U r2 U' r2 U' r2 U r'" },
+  { id: 'OLL51', n: '', g: 'i', e: 6, a: "F U R U' R' U R U' R' F'", alt: ["f R U R' U' R U R' U' f'"] },
+  { id: 'OLL52', n: '', g: 'i', e: 6, a: "R U R' U R U' B U' B' R'", alt: ["R' F' U' F U' R U R' U R"] },
+  { id: 'OLL53', n: '', g: 'l', e: 6, a: "l' U2 L U L' U' L U L' U l", alt: ["r' U2 R U R' U' R U R' U r"] },
+  { id: 'OLL54', n: '', g: 'l', e: 6, a: "r U2 R' U' R U R' U' R U' r'" },
+  { id: 'OLL55', n: '', g: 'i', e: 6, a: "R' F R U R U' R2 F' R2 U' R' U R U R'" },
+  { id: 'OLL56', n: '', g: 'i', e: 6, a: "r' U' r U' R' U R U' R' U R r' U r", alt: ["r U r' U R U' R' U R U' R' r U' r'"] },
+  { id: 'OLL57', n: '', g: 'esquinas', e: 6, a: "R U R' U' M' U R U' r'" },
+  /* ---- PLL ---- */
+  { id: 'Ua', g: 'aristas', e: 3, a: "M2 U M U2 M' U M2", alt: ["R U' R U R U R U' R' U' R2"] },
+  { id: 'Ub', g: 'aristas', e: 3, a: "M2 U' M U2 M' U' M2", alt: ["R2 U R U R' U' R' U' R' U R'"] },
+  { id: 'H', g: 'aristas', e: 3, a: "M2 U M2 U2 M2 U M2" },
+  { id: 'Z', g: 'aristas', e: 3, a: "M' U M2 U M2 U M' U2 M2", alt: ["M2 U M2 U M' U2 M2 U2 M'"] },
+  { id: 'Aa', g: 'esquinasp', e: 5, a: "x R' U R' D2 R U' R' D2 R2 x'", alt: ["x L2 D2 L' U' L D2 L' U L' x'"] },
+  { id: 'Ab', g: 'esquinasp', e: 5, a: "x R2 D2 R U R' D2 R U' R x'", alt: ["x L U' L D2 L' U L D2 L2 x'"] },
+  { id: 'E', g: 'esquinasp', e: 5, a: "x' R U' R' D R U R' D' R U R' D R U' R' D' x" },
+  { id: 'T', g: 'adyacente', e: 3, a: "R U R' U' R' F R2 U' R' U' R U R' F'" },
+  { id: 'F', g: 'adyacente', e: 5, a: "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R" },
+  { id: 'Ja', g: 'adyacente', e: 5, a: "x R2 F R F' R U2 r' U r U2 x'", alt: ["L' U' L F L' U' L U L F' L2 U L"] },
+  { id: 'Jb', g: 'adyacente', e: 5, a: "R U R' F' R U R' U' R' F R2 U' R'" },
+  { id: 'Ra', g: 'adyacente', e: 5, a: "R U' R' U' R U R D R' U' R D' R' U2 R'", alt: ["R U R' F' R U2 R' U2 R' F R U R U2 R'"] },
+  { id: 'Rb', g: 'adyacente', e: 5, a: "R2 F R U R U' R' F' R U2 R' U2 R", alt: ["R' U2 R U2 R' F R U R' U' R' F' R2"] },
+  { id: 'Ga', g: 'adyacente', e: 5, a: "R2 U R' U R' U' R U' R2 U' D R' U R D'" },
+  { id: 'Gb', g: 'adyacente', e: 5, a: "R' U' R U D' R2 U R' U R U' R U' R2 D" },
+  { id: 'Gc', g: 'adyacente', e: 5, a: "R2 U' R U' R U R' U R2 U D' R U' R' D" },
+  { id: 'Gd', g: 'adyacente', e: 5, a: "R U R' U' D R2 U' R U' R' U R' U R2 D'" },
+  { id: 'Y', g: 'diagonal', e: 3, a: "F R U' R' U' R U R' F' R U R' U' R' F R F'" },
+  { id: 'V', g: 'diagonal', e: 5, a: "R' U R' U' R D' R' D R' U D' R2 U' R2 D R2" },
+  { id: 'Na', g: 'diagonal', e: 5, a: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'" },
+  { id: 'Nb', g: 'diagonal', e: 5, a: "R' U R U' R' F' U' F R U R' F R' F' R U' R" }
+];
+
+/* Generado por f2lgen.js: todos verificados en el simulador */
+var F2L_CASES = [
+ {
+  "id": "F2Lb-c1",
+  "set": "F2Lb",
+  "name": "Esquina · blanco a la derecha",
+  "g": "f2lc",
+  "e": 1,
+  "a": "R U R'",
+  "k": "f2lc"
+ },
+ {
+  "id": "F2Lb-c2",
+  "set": "F2Lb",
+  "name": "Esquina · blanco al frente",
+  "g": "f2lc",
+  "e": 1,
+  "a": "F' U' F",
+  "alt": [
+   "U R U' R'"
+  ],
+  "k": "f2lc"
+ },
+ {
+  "id": "F2Lb-c3",
+  "set": "F2Lb",
+  "name": "Esquina · blanco arriba",
+  "g": "f2lc",
+  "e": 1,
+  "a": "R U2 R' U' R U R'",
+  "k": "f2lc"
+ },
+ {
+  "id": "F2Lb-c4",
+  "set": "F2Lb",
+  "name": "Esquina abajo · blanco a la derecha",
+  "g": "f2lc",
+  "e": 1,
+  "a": "R U R' U' R U R'",
+  "k": "f2lc"
+ },
+ {
+  "id": "F2Lb-c5",
+  "set": "F2Lb",
+  "name": "Esquina abajo · blanco al frente",
+  "g": "f2lc",
+  "e": 1,
+  "a": "R U' R' U R U' R'",
+  "k": "f2lc"
+ },
+ {
+  "id": "F2Lb-e1",
+  "set": "F2Lb",
+  "name": "Arista hacia la derecha",
+  "g": "f2le",
+  "e": 1,
+  "a": "U R U' R' U' F' U F",
+  "k": "f2le"
+ },
+ {
+  "id": "F2Lb-e2",
+  "set": "F2Lb",
+  "name": "Arista hacia la izquierda",
+  "g": "f2le",
+  "e": 1,
+  "a": "U' L' U L U F U' F'",
+  "k": "f2le"
+ },
+ {
+  "id": "F2Lb-e3",
+  "set": "F2Lb",
+  "name": "Arista girada en su hueco",
+  "g": "f2le",
+  "e": 1,
+  "a": "U R U' R' U' F' U F U' R U' R' U' F' U F",
+  "k": "f2le"
+ },
+ {
+  "id": "F2L-fd1",
+  "set": "F2L",
+  "name": "Directo 1",
+  "g": "fd",
+  "e": 4,
+  "a": "F' U' F",
+  "alt": [
+   "U F' U F U F' U F"
+  ]
+ },
+ {
+  "id": "F2L-fd2",
+  "set": "F2L",
+  "name": "Directo 2",
+  "g": "fd",
+  "e": 4,
+  "a": "R U R'"
+ },
+ {
+  "id": "F2L-fd3",
+  "set": "F2L",
+  "name": "Directo 3",
+  "g": "fd",
+  "e": 4,
+  "a": "U R U' R'"
+ },
+ {
+  "id": "F2L-fd4",
+  "set": "F2L",
+  "name": "Directo 4",
+  "g": "fd",
+  "e": 4,
+  "a": "U' F' U F"
+ },
+ {
+  "id": "F2L-fa1",
+  "set": "F2L",
+  "name": "Blanco arriba 1",
+  "g": "fa",
+  "e": 4,
+  "a": "R U2 R' U' R U R'"
+ },
+ {
+  "id": "F2L-fa2",
+  "set": "F2L",
+  "name": "Blanco arriba 2",
+  "g": "fa",
+  "e": 4,
+  "a": "F' U2 F U F' U' F"
+ },
+ {
+  "id": "F2L-fa3",
+  "set": "F2L",
+  "name": "Blanco arriba 3",
+  "g": "fa",
+  "e": 4,
+  "a": "U R U2 R' U R U' R'",
+  "alt": [
+   "R U2 R' U R U' R'"
+  ]
+ },
+ {
+  "id": "F2L-fa4",
+  "set": "F2L",
+  "name": "Blanco arriba 4",
+  "g": "fa",
+  "e": 4,
+  "a": "U' F' U2 F U' F' U F"
+ },
+ {
+  "id": "F2L-fa5",
+  "set": "F2L",
+  "name": "Blanco arriba 5",
+  "g": "fa",
+  "e": 4,
+  "a": "U2 R U R' U R U' R'",
+  "alt": [
+   "R U' R' U2 R U R'",
+   "R U R' U R U' R'"
+  ]
+ },
+ {
+  "id": "F2L-fa6",
+  "set": "F2L",
+  "name": "Blanco arriba 6",
+  "g": "fa",
+  "e": 4,
+  "a": "U2 F' U' F U' F' U F",
+  "alt": [
+   "F' U F U2 F' U' F",
+   "U F' U' F U' F' U F"
+  ]
+ },
+ {
+  "id": "F2L-fa7",
+  "set": "F2L",
+  "name": "Blanco arriba 7",
+  "g": "fa",
+  "e": 4,
+  "a": "F U R U' R' F' R U' R'"
+ },
+ {
+  "id": "F2L-fa8",
+  "set": "F2L",
+  "name": "Blanco arriba 8",
+  "g": "fa",
+  "e": 4,
+  "a": "U R U' R' U' R U' R' U R U' R'",
+  "alt": [
+   "U2 R2 U2 R' U' R U' R2"
+  ]
+ },
+ {
+  "id": "F2L-fc1",
+  "set": "F2L",
+  "name": "Al costado 1",
+  "g": "fc",
+  "e": 4,
+  "a": "R U' R' U2 F' U' F"
+ },
+ {
+  "id": "F2L-fc2",
+  "set": "F2L",
+  "name": "Al costado 2",
+  "g": "fc",
+  "e": 4,
+  "a": "U' R U R' U2 R U' R'"
+ },
+ {
+  "id": "F2L-fc3",
+  "set": "F2L",
+  "name": "Al costado 3",
+  "g": "fc",
+  "e": 4,
+  "a": "U F' U' F U2 F' U F"
+ },
+ {
+  "id": "F2L-fc4",
+  "set": "F2L",
+  "name": "Al costado 4",
+  "g": "fc",
+  "e": 4,
+  "a": "U' R U2 R' U2 R U' R'",
+  "alt": [
+   "U R U2 R' U2 R U' R'"
+  ]
+ },
+ {
+  "id": "F2L-fc5",
+  "set": "F2L",
+  "name": "Al costado 5",
+  "g": "fc",
+  "e": 4,
+  "a": "U F' U2 F U2 F' U F"
+ },
+ {
+  "id": "F2L-fc6",
+  "set": "F2L",
+  "name": "Al costado 6",
+  "g": "fc",
+  "e": 4,
+  "a": "U' R U' R' U F' U' F",
+  "alt": [
+   "U F' U' F U' F' U' F"
+  ]
+ },
+ {
+  "id": "F2L-fc7",
+  "set": "F2L",
+  "name": "Al costado 7",
+  "g": "fc",
+  "e": 4,
+  "a": "U' R U R' U R U R'",
+  "alt": [
+   "U2 R U' R' U' R U R'"
+  ]
+ },
+ {
+  "id": "F2L-fc8",
+  "set": "F2L",
+  "name": "Al costado 8",
+  "g": "fc",
+  "e": 4,
+  "a": "U' R U2 R' U F' U' F"
+ },
+ {
+  "id": "F2L-fc9",
+  "set": "F2L",
+  "name": "Al costado 9",
+  "g": "fc",
+  "e": 4,
+  "a": "U F' U F U' F' U' F"
+ },
+ {
+  "id": "F2L-fc10",
+  "set": "F2L",
+  "name": "Al costado 10",
+  "g": "fc",
+  "e": 4,
+  "a": "U' R U' R' U R U R'"
+ },
+ {
+  "id": "F2L-fc11",
+  "set": "F2L",
+  "name": "Al costado 11",
+  "g": "fc",
+  "e": 4,
+  "a": "R' D' R U' R' D R U R U' R'"
+ },
+ {
+  "id": "F2L-fc12",
+  "set": "F2L",
+  "name": "Al costado 12",
+  "g": "fc",
+  "e": 4,
+  "a": "R U' R' U' R U R' U' R U R'"
+ },
+ {
+  "id": "F2L-fe1",
+  "set": "F2L",
+  "name": "Arista abajo 1",
+  "g": "fe",
+  "e": 4,
+  "a": "R U' R' F' U2 F",
+  "alt": [
+   "R U' R' U F' U F"
+  ]
+ },
+ {
+  "id": "F2L-fe2",
+  "set": "F2L",
+  "name": "Arista abajo 2",
+  "g": "fe",
+  "e": 4,
+  "a": "U' R U' R' U2 R U' R'",
+  "alt": [
+   "U F' U2 F U' F' U' F"
+  ]
+ },
+ {
+  "id": "F2L-fe3",
+  "set": "F2L",
+  "name": "Arista abajo 3",
+  "g": "fe",
+  "e": 4,
+  "a": "U R U R' U2 R U R'",
+  "alt": [
+   "U F' U F U2 F' U F",
+   "U' R U2 R' U R U R'"
+  ]
+ },
+ {
+  "id": "F2L-fe4",
+  "set": "F2L",
+  "name": "Arista abajo 4",
+  "g": "fe",
+  "e": 4,
+  "a": "U' R U R' U F' U' F",
+  "alt": [
+   "R U R' F R' F' R"
+  ]
+ },
+ {
+  "id": "F2L-fe5",
+  "set": "F2L",
+  "name": "Arista abajo 5",
+  "g": "fe",
+  "e": 4,
+  "a": "U F' U' F U' R U R'"
+ },
+ {
+  "id": "F2L-fe6",
+  "set": "F2L",
+  "name": "Arista abajo 6",
+  "g": "fe",
+  "e": 4,
+  "a": "R U R' U' R U R' U' R U R'",
+  "alt": [
+   "U R U' R' U R U' R' U R U' R'",
+   "R U' R' U R U' R' U R U' R'"
+  ]
+ },
+ {
+  "id": "F2L-fk1",
+  "set": "F2L",
+  "name": "Esquina abajo 1",
+  "g": "fk",
+  "e": 4,
+  "a": "R U' R' U R U' R'",
+  "alt": [
+   "R U R' U' R U R' U' R U R' U' R U R'"
+  ]
+ },
+ {
+  "id": "F2L-fk2",
+  "set": "F2L",
+  "name": "Esquina abajo 2",
+  "g": "fk",
+  "e": 4,
+  "a": "R U R' U' R U R'"
+ },
+ {
+  "id": "F2L-fk3",
+  "set": "F2L",
+  "name": "Esquina abajo 3",
+  "g": "fk",
+  "e": 4,
+  "a": "F' U' F U F' U' F",
+  "alt": [
+   "R U' R' F' U' F"
+  ]
+ },
+ {
+  "id": "F2L-fk4",
+  "set": "F2L",
+  "name": "Esquina abajo 4",
+  "g": "fk",
+  "e": 4,
+  "a": "U' R' F R F' R U R'",
+  "alt": [
+   "U' F' U F U R U' R'"
+  ]
+ },
+ {
+  "id": "F2L-fk5",
+  "set": "F2L",
+  "name": "Esquina abajo 5",
+  "g": "fk",
+  "e": 4,
+  "a": "U R U' R' F R' F' R",
+  "alt": [
+   "U R U' R' U' F' U F"
+  ]
+ },
+ {
+  "id": "F2L-fk6",
+  "set": "F2L",
+  "name": "Esquina abajo 6",
+  "g": "fk",
+  "e": 4,
+  "a": "R U R' U' F R' F' R",
+  "alt": [
+   "F' U F U' F' U F"
+  ]
+ },
+ {
+  "id": "F2L-fh1",
+  "set": "F2L",
+  "name": "En el hueco 1",
+  "g": "fh",
+  "e": 4,
+  "a": "R2 U2 F R2 F' U2 R' U R'"
+ },
+ {
+  "id": "F2L-fh2",
+  "set": "F2L",
+  "name": "En el hueco 2",
+  "g": "fh",
+  "e": 4,
+  "a": "R F U R U' R' F' U' R'",
+  "alt": [
+   "F' U' R' F' U' F U R F"
+  ]
+ },
+ {
+  "id": "F2L-fh3",
+  "set": "F2L",
+  "name": "En el hueco 3",
+  "g": "fh",
+  "e": 4,
+  "a": "R U F R U R' U' F' R'",
+  "alt": [
+   "F' R' U' F' U F R U F"
+  ]
+ },
+ {
+  "id": "F2L-fh4",
+  "set": "F2L",
+  "name": "En el hueco 4",
+  "g": "fh",
+  "e": 4,
+  "a": "R U' R' U' R U R' U2 R U' R'"
+ },
+ {
+  "id": "F2L-fh5",
+  "set": "F2L",
+  "name": "En el hueco 5",
+  "g": "fh",
+  "e": 4,
+  "a": "R U' R' U R U2 R' U R U' R'",
+  "alt": [
+   "R U R' U2 R U' R' U R U R'"
+  ]
+ }
+];
+
+/* Algoritmos de las guías de myrubik.com (OLL, PLL y F2L reducidos), tal como aparecen impresos */
+var GUIAS = [
+  { kind: 'oll', name: 'OLL reducido', algs: ["R U2 R' U' R U R' U' R U' R'", "R U2 R2 U' R2 U' R2 U2 R", "L' U R U' L U R'", "R U' L' U R' U' L", "R2 D' R U2 R' D R U2 R", "r U R' U' r' F R F'", "R' F' L' F R F' L F"] },
+  { kind: 'pll', name: 'PLL reducido', algs: ["l' U R' D2 R U' R' D2 R2", "R U' R U x U F' U F U2 R U R' U' R'", "M2 U M2 U2 M2 U M2", "M2 U' M2 U' M' U2 M2 U2 M' U2", "R' U R' U' R' U' R' U R U R2", "R U R' U R' U' R2 U' R' U R' U R U2"] },
+  { kind: 'f2l', name: 'F2L reducido', algs: ["U R U' R'", "U' F' U F", "F' U' F", "R U R'",
+    "R U' R' U R U' R' U2", "U' R' U2 R U F' U' F", "R U' R' U2 F' U' F", "F' U F U2 R U R'",
+    "U' R U' R' U R U R'", "d R' U R U' R' U' R", "U F' U' F U2 F' U F", "U' R U R' U' R U2 R'",
+    "U' R U R' U R U R'", "U' R U' R' U F' U' F", "y' U' R' U2 R U2 R' U R", "U' R U2 R' U2 R U' R'",
+    "R U R' U2 R U R' U' R U R'", "R U R' U R U2 R' F' U2 F", "F' U2 F U F' U' F", "R U2 R' U' R U R'",
+    "U' F' U2 F U' F' U F", "U R U2 R' U R U' R'", "U2 R U R' U R U' R'", "U2 F' U' F U' F' U F"] }
+];
+
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  function h(tag, attrs, kids) {
+    var e = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      var v = attrs[k];
+      if (v == null || v === false) continue;
+      if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v; else if (k === 'html') e.innerHTML = v;
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? '' : v);
+    }
+    (kids || []).forEach(function (c) { if (c != null) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return e;
+  }
+  var ICON = {
+    play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>',
+    pause: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg>',
+    prev: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11.5 2.5v11L4 8z"/></svg>',
+    next: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.5v11L12 8z"/></svg>',
+    reset: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h2v11H3zM13.5 2.5v11L6 8z"/></svg>',
+    luna: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.2 1.3a6.8 6.8 0 1 0 8.5 8.5A5.6 5.6 0 0 1 6.2 1.3z"/></svg>',
+    sol: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M8 .8v2.2M8 13v2.2M.8 8H3M13 8h2.2M2.9 2.9l1.6 1.6M11.5 11.5l1.6 1.6M2.9 13.1l1.6-1.6M11.5 4.5l1.6-1.6"/></svg>',
+    x: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.3 2.2 8 6.9l4.7-4.7 1.1 1.1L9.1 8l4.7 4.7-1.1 1.1L8 9.1l-4.7 4.7-1.1-1.1L6.9 8 2.2 3.3z"/></svg>'
+  };
+
+  /* ---------- Contenido ---------- */
+  var STAGES = [
+    { n: 1, t: 'F2L principiante', sub: '8 casos · repaso',
+      how: 'Es el método por capas que ya conoces, para repasarlo y tomarte el tiempo. <strong>Primero las esquinas blancas:</strong> pon la esquina justo encima de su lugar (adelante a la derecha) y mira hacia dónde apunta el blanco. Si dudas, repite R U R\' U\' hasta que entre: con 1, 3 o 5 repeticiones queda bien.<br><strong>Después las aristas del medio:</strong> gira la capa de arriba hasta que el color del frente de la arista coincida con su centro. El color de arriba de la arista te dice si va a la derecha o a la izquierda.' },
+    { n: 2, t: 'OLL en 2 pasos', sub: '10 algoritmos',
+      how: '<strong>Paso A, la cruz.</strong> Mira solo las cuatro aristas de arriba: verás un punto, una L o una línea. Uno de los 3 primeros algoritmos te deja la cruz amarilla.<br><strong>Paso B, las esquinas.</strong> Con la cruz hecha quedan 7 casos. Cuenta cuántas esquinas tienen el amarillo arriba: ninguna, una o dos.' },
+    { n: 3, t: 'PLL en 2 pasos', sub: '6 algoritmos',
+      how: '<strong>Paso A, las esquinas.</strong> Busca un lado donde las dos esquinas sean del mismo color («faros»). Si existe, déjalo a la izquierda y haz la T. Si ningún lado tiene faros, haz la Y desde cualquier ángulo.<br><strong>Paso B, las aristas.</strong> Con las esquinas en su sitio quedan 4 casos: Ua, Ub, H y Z.' },
+    { n: 4, t: 'F2L completo', sub: '41 casos',
+      how: 'En vez de meter primero la esquina y después la arista, las juntas arriba y entran en un solo paso. Son 41 casos, pero se entienden más de lo que se memorizan: casi todos juntan la pareja arriba y la meten con R U R\' o con F\' U\' F. Mira cada uno animado y busca esa idea.<br><strong>Orden sugerido:</strong> Directo, Blanco arriba y Al costado, que son los que más salen; después los casos con piezas metidas en el hueco. <strong>Para los otros tres huecos</strong>, gira el cubo (y) hasta dejar el hueco adelante a la derecha. Y haz la cruz con el blanco abajo: así empiezas el F2L sin girar el cubo.' },
+    { n: 5, t: 'PLL completo', sub: 'los 15 restantes',
+      how: 'Con los 21 casos resuelves la permutación con un solo algoritmo en vez de dos. <strong>Orden sugerido:</strong> Jb (comparte casi todo con la T), Ja, Aa y Ab, luego Ra, Rb, F y V. Deja las cuatro G y las dos N para el final.' },
+    { n: 6, t: 'OLL completo', sub: 'los 50 restantes',
+      how: 'Son muchos, así que avanza por formas y no por número. <strong>Empieza por las cortas:</strong> T, cuadrados y P. Deja los puntos para el final. Mientras tanto, lo que no sepas se resuelve con los 2 pasos de la etapa 2.' }
+  ];
+  var GROUPS = {
+    f2lc: ['Esquinas de la primera capa', 'Pon la esquina justo encima de su lugar, adelante a la derecha.'],
+    f2le: ['Aristas de la capa del medio', 'El color del frente de la arista debe coincidir con el centro del frente.'],
+    fd: ['Directo', 'Se resuelven en 3 o 4 movimientos.'],
+    fa: ['Blanco arriba', 'Esquina y arista arriba; la esquina tiene el blanco mirando hacia arriba.'],
+    fc: ['Al costado', 'Esquina y arista arriba; la esquina tiene el blanco mirando hacia un costado.'],
+    fe: ['Arista abajo', 'La arista ya está en su hueco y la esquina está arriba.'],
+    fk: ['Esquina abajo', 'La esquina ya está en su hueco y la arista está arriba.'],
+    fh: ['En el hueco', 'Las dos piezas están en su hueco, pero mal colocadas.'],
+    cruz2: ['Paso A · hacer la cruz', 'Solo importan las aristas. Las esquinas, marcadas con trama, pueden estar de cualquier forma.'],
+    cruz: ['Paso B · cruz hecha, orientar esquinas', 'Las cuatro aristas ya tienen el amarillo arriba.'],
+    t: ['Forma de T', ''], cuadrado: ['Cuadrado', ''], p: ['Forma de P', ''], c: ['Forma de C', ''], w: ['Forma de W', ''],
+    esquinas: ['Esquinas ya orientadas', 'Solo faltan aristas.'], pez: ['Pez', ''], i: ['Línea (forma de I)', ''],
+    caballo: ['Salto de caballo', ''], rayo: ['Rayo', ''], l: ['L pequeña', ''], incomodo: ['Formas incómodas', ''],
+    punto: ['Punto', 'Ninguna arista tiene el amarillo arriba.'],
+    adyacente: ['Intercambio de esquinas vecinas', 'Hay un lado con las dos esquinas del mismo color.'],
+    diagonal: ['Intercambio de esquinas en diagonal', 'Ningún lado tiene las dos esquinas del mismo color.'],
+    aristas: ['Solo aristas', 'Las cuatro esquinas ya están en su sitio.'],
+    esquinasp: ['Solo esquinas', 'Las cuatro aristas ya están en su sitio.']
+  };
+  var GROUP_ORDER = ['f2lc', 'f2le', 'fd', 'fa', 'fc', 'fe', 'fk', 'fh', 'cruz2', 'cruz', 'adyacente', 'diagonal', 'aristas', 'esquinasp', 't', 'cuadrado', 'p', 'c', 'w', 'esquinas', 'pez', 'i', 'caballo', 'rayo', 'l', 'incomodo', 'punto'];
+  var ESTADO = ['Sin empezar', 'Aprendiendo', 'Dominado'];
+  /* Movimientos con nombre de la comunidad. El usuario puede editar la lista en Personalizar. */
+  var TRIG_DEF = [
+    { n: 'Sexy move', a: "R U R' U'", d: 'El más común de todos.' },
+    { n: 'Sexy inverso', a: "U R U' R'", d: 'El sexy move al revés.' },
+    { n: 'Sexy zurdo', a: "L' U' L U", d: 'El espejo del sexy move, con la mano izquierda.' },
+    { n: 'Sexy ancho', a: "r U R' U'", d: 'Igual que el sexy, empezando con r.' },
+    { n: 'Sledgehammer', a: "R' F R F'", d: 'El «martillo».' },
+    { n: 'Hedgeslammer', a: "F R' F' R", d: 'El sledgehammer al revés.' },
+    { n: 'Sune', a: "R U R' U R U2 R'", d: 'OLL 27 completo; aparece dentro de muchos otros.' },
+    { n: 'Antisune', a: "R U2 R' U' R U' R'", d: 'OLL 26 completo; el Sune al revés.' },
+    { n: 'Niklas', a: "R U' L' U R' U' L", d: 'Mueve tres esquinas de la capa de arriba.' }
+  ];
+  var TRIG = [];
+  function trigList() { return store.prefs.trigs || TRIG_DEF.map(function (t) { return { n: t.n, a: t.a }; }); }
+  function trigValid(t) { var ms = Cube.parse(t.a); return t.n && t.n.trim() && ms.length >= 2 && ms.length <= 30; }
+  function rebuildTrig() {
+    TRIG = store.prefs.trigOn === false ? [] : trigList().filter(trigValid).map(function (t) { return { k: Cube.str(Cube.parse(t.a)).split(' '), n: t.n.trim() }; })
+      .sort(function (x, y) { return y.k.length - x.k.length; });
+  }
+  function trigOf(toks) { for (var t = 0; t < TRIG.length; t++) if (TRIG[t].k.join(' ') === toks.join(' ')) return TRIG[t]; return null; }
+
+  var BY_ID = {};
+  CASES = F2L_CASES.concat(CASES);
+  function isF2L(c) { return c.kind === 'f2l' || c.kind === 'f2lc' || c.kind === 'f2le'; }
+  CASES.forEach(function (c) {
+    c.kind = c.set === 'F2L' ? 'f2l' : c.set === 'F2Lb' ? c.k : c.set === 'EO' ? 'eo' : (c.id.indexOf('OLL') === 0 ? 'oll' : 'pll');
+    c.label = c.kind === 'oll' ? 'OLL ' + c.id.slice(3) : c.kind === 'pll' ? 'PLL ' + c.id : c.name;
+    c.short = c.kind === 'oll' ? c.id.slice(3) : c.kind === 'pll' ? c.id : c.name.replace('Cruz · ', '');
+    var r = Cube.check(c.a, c.kind);
+    c.sig = r.sig || null;
+    c.freq = c.kind === 'oll' ? Math.round(216 / r.count) : c.kind === 'pll' ? Math.round(288 / r.count) : 0;
+    BY_ID[c.id] = c;
+  });
+  /* Guías impresas: cada algoritmo válido se asocia a su caso; si es nuevo, entra como alternativa */
+  function normA(x) { return Cube.str(Cube.parse(x)); }
+  var GUIA_FALLIDOS = [];
+  GUIAS.forEach(function (g) {
+    g.algs.forEach(function (x) {
+      var r = Cube.check(x, g.kind), c = r.ok && CASES.filter(function (k) { return k.kind === g.kind && k.sig === r.sig; })[0];
+      if (!c) { GUIA_FALLIDOS.push(x); return; }
+      c.guia = c.guia || {}; c.guia[normA(x)] = g.name;
+      if ([c.a].concat(c.alt || []).map(normA).indexOf(normA(x)) < 0) (c.alt = c.alt || []).push(x);
+    });
+  });
+  (function () { /* errata de la guía F2L: el algoritmo impreso desarma otras piezas */
+    var ok = "U' R U2 R' U F' U' F", r = Cube.check(ok, 'f2l'), c = CASES.filter(function (k) { return k.kind === 'f2l' && k.sig === r.sig; })[0];
+    if (c) { c.guia = c.guia || {}; c.guia[normA(ok)] = 'F2L reducido'; c.guiaNota = "En la guía impresa aparece como U' R' U2 R U F' U' F, pero así desarma otras piezas. Esta es la versión que funciona: cambia R' U2 R por R U2 R'."; }
+  })();
+  function guiaDe(c, alg) { return c.guia && c.guia[normA(alg)] || ''; }
+  function guiaTag(c, alg) { var g = guiaDe(c, alg); return g ? h('span', { class: 'guia', title: 'Algoritmo de tu guía ' + g, text: 'Guía' }) : null; }
+
+  /* ---------- Progreso (navegador + cuenta) ---------- */
+  var LS_KEY = 'ollpll.progreso.v1';
+  var store = { v: 1, cases: {}, prefs: { speed: 420, auf: false, set: '', tema: 'auto', marca: { k: 'none', txt: '', img: '' } }, updatedAt: 0 };
+  function limpiaTxt(t) { return String(t || '').replace(/["\\<>\u0000-\u001f]/g, '').trim().slice(0, 4); }
+  function normalize(o) {
+    var out = { v: 1, cases: {}, prefs: { speed: 420, auf: false, set: '', tema: 'auto', marca: { k: 'none', txt: '', img: '' } }, updatedAt: +o.updatedAt || 0 };
+    if (o.prefs) { out.prefs.speed = [0, 240, 420, 620, 900].indexOf(+o.prefs.speed) >= 0 ? +o.prefs.speed : 420; out.prefs.auf = !!o.prefs.auf; out.prefs.set = String(o.prefs.set || ''); out.prefs.tema = o.prefs.tema === 'dark' || o.prefs.tema === 'light' ? o.prefs.tema : 'auto'; out.prefs.fcset = String(o.prefs.fcset || ''); out.prefs.estilo = ['base', 'crono', 'pop', 'mini'].indexOf(o.prefs.estilo) >= 0 ? o.prefs.estilo : 'base'; out.prefs.fcrot = !!o.prefs.fcrot; out.prefs.trigOn = o.prefs.trigOn !== false;
+      out.prefs.trigs = Array.isArray(o.prefs.trigs) ? o.prefs.trigs.slice(0, 40).map(function (t) { return { n: String((t && t.n) || '').slice(0, 30), a: String((t && t.a) || '').slice(0, 120) }; }) : null;
+      var mk = o.prefs.marca || {}, img = typeof mk.img === 'string' && mk.img.indexOf('data:image/') === 0 && mk.img.length < 200000 ? mk.img : '';
+      out.prefs.marca = { k: /^(none|e[0-4]|txt|img)$/.test(mk.k) ? mk.k : 'none', txt: limpiaTxt(mk.txt), img: img }; }
+    for (var id in (o.cases || {})) if (BY_ID[id]) {
+      var p = o.cases[id] || {};
+      out.cases[id] = { s: [0, 1, 2].indexOf(p.s) >= 0 ? p.s : 0, w: +p.w || 3, n: +p.n || 0, ok: +p.ok || 0, streak: +p.streak || 0,
+        best: +p.best || 0, last: Array.isArray(p.last) ? p.last.slice(-12).map(Number) : [], alg: typeof p.alg === 'string' ? p.alg : '', grp: cleanGrp(p.grp) };
+    }
+    return out;
+  }
+  function loadLocal() { try { var s = localStorage.getItem(LS_KEY); if (s) store = normalize(JSON.parse(s)); } catch (e) { } }
+  function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(store)); } catch (e) { } }
+  function cleanGrp(g) {
+    var o = {}; if (!g || typeof g !== 'object') return o;
+    for (var k in g) if (Array.isArray(g[k])) { var v = g[k].map(Number).filter(function (x) { return x > 0 && x < 80 && x === Math.floor(x); }); if (v.length) o[k] = v.sort(function (x, y) { return x - y; }); }
+    return o;
+  }
+  function P(id) { var p = store.cases[id] || (store.cases[id] = { s: 0, w: 3, n: 0, ok: 0, streak: 0, best: 0, last: [], alg: '', grp: {} }); if (!p.grp) p.grp = {}; return p; }
+  function peek(id) { return store.cases[id] || { s: 0, w: 3, n: 0, ok: 0, streak: 0, best: 0, last: [], alg: '', grp: {} }; }
+  /* Secciones propias del usuario: índices de corte (antes del movimiento i) para un algoritmo concreto */
+  function cutsOf(c, alg) { var g = peek(c.id).grp; return (g && g[Cube.str(Cube.parse(alg))]) || null; }
+  function setCuts(c, alg, cuts) { var p = P(c.id), k = Cube.str(Cube.parse(alg)); if (cuts && cuts.length) p.grp[k] = cuts.slice().sort(function (x, y) { return x - y; }); else delete p.grp[k]; touch(); }
+  function algOf(c) { return peek(c.id).alg || c.a; }
+  var remote = { doc: null, timer: 0, writing: false, dirty: false, retry: 0 };
+  function setSync(s) {
+    var el = $('#sync'); el.dataset.s = s;
+    el.textContent = s === 'cloud' ? 'Progreso guardado en tu cuenta' : s === 'saving' ? 'Guardando…' : 'Progreso guardado en este navegador';
+  }
+  function touch() { store.updatedAt = Date.now(); saveLocal(); queueRemote(); }
+  function queueRemote() { if (!remote.doc) return; remote.dirty = true; remote.retry = 0; clearTimeout(remote.timer); remote.timer = setTimeout(flush, 1500); }
+  function flush() {
+    if (!remote.doc || remote.writing || !remote.dirty) return;
+    remote.writing = true; remote.dirty = false; setSync('saving');
+    remote.doc.set(JSON.parse(JSON.stringify(store))).then(function () { setSync('cloud'); }, function (e) {
+      if (e && e.code === 'unavailable' && remote.retry < 1) { remote.retry++; remote.dirty = true; setSync('cloud'); }
+      else { remote.doc = null; setSync('local'); }
+    }).then(function () {
+      remote.writing = false;
+      if (remote.dirty && remote.doc) { clearTimeout(remote.timer); remote.timer = setTimeout(flush, 2500); }
+    });
+  }
+  function initRemote() {
+    if (!window.claude || typeof window.claude.use !== 'function') return;
+    Promise.all([window.claude.use('db'), window.claude.use('user')]).then(function (r) {
+      var db = r[0], user = r[1]; if (!db || !user) return;
+      return user.id().then(function (id) {
+        if (!id) return;
+        var doc = db.doc('data/users/' + id + '/progreso');
+        return doc.get().then(function (snap) {
+          remote.doc = doc;
+          var d = snap.exists ? snap.data() : null;
+          if (d && d.cases && (+d.updatedAt || 0) >= (store.updatedAt || 0)) {
+            if ((+d.updatedAt || 0) > (store.updatedAt || 0)) { store = normalize(JSON.parse(JSON.stringify(d))); saveLocal(); refreshAll(); }
+          } else if (store.updatedAt) queueRemote();
+          setSync('cloud');
+        });
+      });
+    }).catch(function () { remote.doc = null; setSync('local'); });
+  }
+  document.addEventListener('visibilitychange', function () { if (document.hidden && remote.dirty) { clearTimeout(remote.timer); flush(); } });
+
+  /* ---------- Utilidades de algoritmos ---------- */
+  function simplify(ms) {
+    var out = [];
+    ms.forEach(function (m) {
+      var l = out[out.length - 1];
+      if (l && l.b === m.b) { l.t = (l.t + m.t) % 4; if (!l.t) out.pop(); } else out.push({ b: m.b, t: m.t });
+    });
+    return out;
+  }
+  function inv1(m) { return { b: m.b, t: (4 - m.t) % 4 }; }
+  function setupOf(alg, pre, post) {
+    if (Cube.caseState(alg).prefix) alg = Cube.str(Cube.derotate(Cube.parse(alg)));   /* algoritmos con y, d…: mezcla sin girar el cubo */
+    var cs = Cube.caseState(alg, pre, post);
+    return { state: cs.state, prefix: cs.prefix, moves: simplify(Cube.parse(pre || '').concat(Cube.parse(cs.prefix), Cube.invert(Cube.parse(alg)), Cube.parse(post || ''))) };
+  }
+  /* Dibuja un algoritmo como movimientos; agrupa los gatillos conocidos. lead/tail = ajustes de U entre paréntesis */
+  /* Bloques de gatillos conocidos: [{s, e, n}] */
+  function trigBlocks(moves) {
+    var toks = moves.map(Cube.tok), out = [], i = 0;
+    while (i < moves.length) {
+      var hit = null;
+      for (var t = 0; t < TRIG.length && !hit; t++) {
+        var k = TRIG[t].k, ok = i + k.length <= moves.length;
+        for (var j = 0; ok && j < k.length; j++) if (toks[i + j] !== k[j]) ok = false;
+        if (ok) hit = TRIG[t];
+      }
+      if (hit) { out.push({ s: i, e: i + hit.k.length, n: hit.n }); i += hit.k.length; } else i++;
+    }
+    return out;
+  }
+  function trigCuts(moves) {
+    var cuts = [];
+    trigBlocks(moves).forEach(function (b) { [b.s, b.e].forEach(function (x) { if (x > 0 && x < moves.length && cuts.indexOf(x) < 0) cuts.push(x); }); });
+    return cuts.sort(function (x, y) { return x - y; });
+  }
+  function grpText(moves, cuts) {
+    if (!cuts || !cuts.length) {
+      var out = [], i = 0, bl = trigBlocks(moves), bi = 0;
+      while (i < moves.length) { var b = bl[bi]; if (b && b.s === i) { out.push('(' + Cube.str(moves.slice(b.s, b.e)) + ')'); i = b.e; bi++; } else { out.push(Cube.tok(moves[i])); i++; } }
+      return out.join(' ');
+    }
+    var parts = [], last = 0; cuts.concat([moves.length]).forEach(function (x) { parts.push(Cube.str(moves.slice(last, x))); last = x; });
+    return parts.join('  ·  ');
+  }
+  function algoEl(moves, lead, tail, cuts) {
+    var box = h('div', { class: 'algo' }), toks = moves.map(Cube.tok), i = 0, idx = 0, off = (lead || []).length;
+    function mv(m, cls) { var s = h('span', { class: 'mv' + (cls ? ' ' + cls : ''), text: (cls ? '(' : '') + Cube.tok(m) + (cls ? ')' : '') }); s.dataset.i = idx++; return s; }
+    (lead || []).forEach(function (m) { box.appendChild(mv(m, 'auf')); });
+    if (cuts && cuts.length) {
+      box.classList.add('con-grupos');
+      var last = 0;
+      cuts.concat([moves.length]).forEach(function (x, n) {
+        if (x <= last) return;
+        var tn = trigOf(toks.slice(last, x));
+        var g = h('span', { class: 'grp' + (tn ? ' grp-trg' : ''), 'data-n': n + 1, 'data-s': last + off, 'data-e': x + off, title: 'Sección ' + (n + 1) + (tn ? ' · ' + tn.n : '') });
+        for (var q = last; q < x; q++) g.appendChild(mv(moves[q]));
+        if (tn) g.appendChild(h('span', { class: 'trg-n', text: tn.n }));
+        box.appendChild(g); last = x;
+      });
+      i = moves.length;
+    }
+    var blocks = i < moves.length ? trigBlocks(moves) : [], bi = 0;
+    while (i < moves.length) {
+      var b = blocks[bi];
+      if (b && b.s === i) {
+        var g = h('span', { class: 'trg', title: b.n });
+        for (var q = b.s; q < b.e; q++) g.appendChild(mv(moves[q]));
+        g.appendChild(h('span', { class: 'trg-n', text: b.n }));
+        box.appendChild(g); i = b.e; bi++;
+      } else { box.appendChild(mv(moves[i])); i++; }
+    }
+    if (box.querySelector('.trg-n')) box.classList.add('con-nombres');
+    (tail || []).forEach(function (m) { box.appendChild(mv(m, 'auf')); });
+    return box;
+  }
+
+  /* ---------- Diagramas vistos desde arriba ---------- */
+  function topData(st) {
+    var ix = Cube.index(st), u = [], s = { B: [], R: [], F: [], L: [] }, x, z;
+    for (z = -1; z <= 1; z++) for (x = -1; x <= 1; x++) u.push(ix[Cube.key([x, 1, z], [0, 1, 0])]);
+    for (x = -1; x <= 1; x++) { s.B.push(ix[Cube.key([x, 1, -1], [0, 0, -1])]); s.F.push(ix[Cube.key([x, 1, 1], [0, 0, 1])]); }
+    for (z = -1; z <= 1; z++) { s.R.push(ix[Cube.key([1, 1, z], [1, 0, 0])]); s.L.push(ix[Cube.key([-1, 1, z], [-1, 0, 0])]); }
+    return { u: u, s: s };
+  }
+  function pllArrows(st) {
+    var ix = Cube.index(st), mv = [], x, z;
+    for (x = -1; x <= 1; x++) for (z = -1; z <= 1; z++) {
+      if (!x && !z) continue;
+      var hx = 0, hz = 0;
+      if (x) { var a = Cube.FACE_N[ix[Cube.key([x, 1, z], [x, 0, 0])]]; hx += a[0]; hz += a[2]; }
+      if (z) { var b = Cube.FACE_N[ix[Cube.key([x, 1, z], [0, 0, z])]]; hx += b[0]; hz += b[2]; }
+      if (hx !== x || hz !== z) mv.push({ f: [x, z], t: [hx, hz] });
+    }
+    var out = '';
+    mv.forEach(function (m, i) {
+      var two = false, skip = false;
+      mv.forEach(function (o, j) { if (o.f[0] === m.t[0] && o.f[1] === m.t[1] && o.t[0] === m.f[0] && o.t[1] === m.f[1]) { two = true; if (j < i) skip = true; } });
+      if (skip) return;
+      var x1 = 26 + (m.f[0] + 1) * 24, y1 = 26 + (m.f[1] + 1) * 24, x2 = 26 + (m.t[0] + 1) * 24, y2 = 26 + (m.t[1] + 1) * 24;
+      var dx = x2 - x1, dy = y2 - y1, L = Math.sqrt(dx * dx + dy * dy), ux = dx / L, uy = dy / L, pad = 6, hd = 6;
+      var ax = x1 + ux * pad, ay = y1 + uy * pad, bx = x2 - ux * pad, by = y2 - uy * pad;
+      function head(px, py, sx, sy) {
+        var qx = px - sx * hd, qy = py - sy * hd, nx = -sy * 3.1, ny = sx * 3.1;
+        return '<polygon class="ah" points="' + [px, py, qx + nx, qy + ny, qx - nx, qy - ny].map(function (v) { return v.toFixed(1); }).join(' ') + '"/>';
+      }
+      var sx1 = two ? ax + ux * (hd - 1) : ax, sy1 = two ? ay + uy * (hd - 1) : ay;
+      out += '<line class="ar" x1="' + sx1.toFixed(1) + '" y1="' + sy1.toFixed(1) + '" x2="' + (bx - ux * (hd - 1)).toFixed(1) + '" y2="' + (by - uy * (hd - 1)).toFixed(1) + '"/>' + head(bx, by, ux, uy);
+      if (two) out += head(ax, ay, -ux, -uy);
+    });
+    return out;
+  }
+  /* F2L: deja en gris las piezas que no importan para el caso (los centros nunca) */
+  function viewState(c, st) {
+    if (!isF2L(c)) return st;
+    var m = Cube.piecesAt(st), want = [];
+    if (c.kind !== 'f2le') want.push(['D', 'F', 'R']);
+    if (c.kind === 'f2l') want.push(['F', 'R']);
+    if (c.kind === 'f2le') Cube.MID.forEach(function (p) { if (!Cube.solvedAt(m, p)) want.push(Cube.homeColors(p)); });
+    var keep = {};
+    want.forEach(function (cols) { var f = Cube.findPiece(st, cols); if (f) keep[f.p.join(',')] = 1; });
+    var out = Cube.clone(st);
+    out.forEach(function (s) {
+      var k = s.p.join(','), n = Math.abs(s.p[0]) + Math.abs(s.p[1]) + Math.abs(s.p[2]);
+      if (n < 2 || keep[k]) return;
+      if (s.p[1] === 1 || (c.kind === 'f2lc' && s.p[1] === 0)) s.c = 'X';
+    });
+    return out;
+  }
+  function isoDiagram(c, st) {
+    var cos = 0.866, o = '<svg class="dg" viewBox="-3 -3.15 6 6.3" role="img" aria-label="Diagrama de ' + c.label + ' en perspectiva">';
+    function P(v) { return ((v[0] - v[2]) * cos).toFixed(3) + ',' + (-v[1] + (v[0] + v[2]) * 0.5).toFixed(3); }
+    function quad(cen, u, v, k) { return [[1, 1], [1, -1], [-1, -1], [-1, 1]].map(function (s) { return P([cen[0] + (u[0] * s[0] + v[0] * s[1]) * k, cen[1] + (u[1] * s[0] + v[1] * s[1]) * k, cen[2] + (u[2] * s[0] + v[2] * s[1]) * k]); }).join(' '); }
+    var TAN = { '0,1,0': [[1, 0, 0], [0, 0, 1]], '1,0,0': [[0, 1, 0], [0, 0, 1]], '0,0,1': [[1, 0, 0], [0, 1, 0]] };
+    ['0,1,0', '1,0,0', '0,0,1'].forEach(function (nk) { var n = nk.split(',').map(Number), t = TAN[nk]; o += '<polygon class="bg" points="' + quad([n[0] * 1.5, n[1] * 1.5, n[2] * 1.5], t[0], t[1], 1.56) + '"/>'; });
+    st.forEach(function (s) {
+      var nk = s.n.join(','); if (!TAN[nk]) return;
+      var t = TAN[nk], cen = [s.p[0] + s.n[0] * 0.5, s.p[1] + s.n[1] * 0.5, s.p[2] + s.n[2] * 0.5];
+      o += '<polygon class="c' + s.c + '" points="' + quad(cen, t[0], t[1], 0.43) + '"/>';
+    });
+    return o + '</svg>';
+  }
+  var dgCache = {};
+  function diagram(c, alg, state) {
+    var ck = c.id + '|' + alg;
+    if (!state && dgCache[ck]) return dgCache[ck];
+    if (isF2L(c)) { var iso = isoDiagram(c, viewState(c, state || Cube.caseState(alg).state)); if (!state) dgCache[ck] = iso; return iso; }
+    var st = state || Cube.caseState(alg).state, d = topData(st), o = '<svg class="dg" viewBox="0 0 100 100" role="img" aria-label="Diagrama de ' + c.label + ' visto desde arriba"><rect class="bg" x="12" y="12" width="76" height="76" rx="6"/>';
+    for (var i = 0; i < 9; i++) {
+      var col = i % 3, row = (i - col) / 3, corner = col !== 1 && row !== 1;
+      var cls = c.kind === 'pll' ? 'u' : (c.kind === 'eo' && corner) ? 'unk' : (d.u[i] === 'U' ? 'u' : 'off');
+      o += '<rect class="' + cls + '" x="' + (15 + col * 24) + '" y="' + (15 + row * 24) + '" width="22" height="22" rx="3"/>';
+    }
+    [['B', 0], ['F', 1], ['L', 2], ['R', 3]].forEach(function (sd) {
+      d.s[sd[0]].forEach(function (color, k) {
+        if (c.kind !== 'pll' && color !== 'U') return;
+        if (c.kind === 'eo' && k !== 1) return;
+        var a = 15 + k * 24, cls = c.kind === 'pll' ? 'c' + color : 'u';
+        if (sd[1] === 0) o += '<rect class="' + cls + '" x="' + a + '" y="2.5" width="22" height="6.5" rx="2"/>';
+        if (sd[1] === 1) o += '<rect class="' + cls + '" x="' + a + '" y="91" width="22" height="6.5" rx="2"/>';
+        if (sd[1] === 2) o += '<rect class="' + cls + '" x="2.5" y="' + a + '" width="6.5" height="22" rx="2"/>';
+        if (sd[1] === 3) o += '<rect class="' + cls + '" x="91" y="' + a + '" width="6.5" height="22" rx="2"/>';
+      });
+    });
+    if (c.kind === 'pll') o += pllArrows(st);
+    o += '</svg>';
+    if (!state) dgCache[ck] = o;
+    return o;
+  }
+  var DIR = { '1,0,0': 'la derecha', '-1,0,0': 'la izquierda', '0,0,1': 'el frente', '0,0,-1': 'atrás', '0,1,0': 'arriba', '0,-1,0': 'abajo' };
+  function f2lFacts(c, st) {
+    var m = Cube.piecesAt(st), corner = Cube.findPiece(st, ['D', 'F', 'R']);
+    var cTxt = corner.p[1] === 1 ? 'arriba, con el blanco hacia ' + DIR[corner.n.join(',')] : (Cube.solvedAt(m, Cube.DC[0]) ? 'en su hueco y bien colocada' : 'en su hueco pero girada, con el blanco hacia ' + DIR[corner.n.join(',')]);
+    if (c.kind === 'f2lc') return 'Esquina blanca: ' + cTxt + '.';
+    if (c.kind === 'f2le') {
+      var tg = Cube.MID.filter(function (p) { return !Cube.solvedAt(m, p); })[0], ed = Cube.findPiece(st, Cube.homeColors(tg));
+      if (ed.p[1] !== 1) return 'La arista está en su hueco, pero al revés. Sácala con el algoritmo de la derecha y vuelve a meterla.';
+      return 'La arista va hacia ' + (tg[0] > 0 ? 'la derecha' : 'la izquierda') + ': su color de arriba coincide con el centro de ese lado.';
+    }
+    var edge = Cube.findPiece(st, ['F', 'R']), eTxt;
+    if (edge.p[1] === 1) eTxt = 'arriba';
+    else eTxt = Cube.solvedAt(m, Cube.MID[0]) ? 'en su hueco y bien colocada' : 'en su hueco pero al revés';
+    var pair = '';
+    if (corner.p[1] === 1 && edge.p[1] === 1) {
+      var cs = m[corner.p.join(',')], es = m[edge.p.join(',')];
+      var adj = Math.abs(corner.p[0] - edge.p[0]) + Math.abs(corner.p[2] - edge.p[2]) === 1;
+      var match = adj && es.every(function (e) { return cs.some(function (k) { return k.n.join(',') === e.n.join(',') && k.c === e.c; }); });
+      pair = match ? ' Ya están juntas formando la pareja: solo falta meterla.' : (adj ? ' Están juntas, pero no combinan: hay que separarlas y volver a juntarlas.' : ' Están separadas.');
+    }
+    return 'Esquina: ' + cTxt + '. Arista: ' + eTxt + '.' + pair;
+  }
+  function facts(c, alg) {
+    if (isF2L(c)) return f2lFacts(c, Cube.caseState(alg).state);
+    var d = topData(Cube.caseState(alg).state);
+    if (c.kind === 'pll') {
+      var bar = 0, far = 0, blo = 0;
+      ['F', 'R', 'B', 'L'].forEach(function (k) { var s = d.s[k]; if (s[0] === s[1] && s[1] === s[2]) bar++; else if (s[0] === s[2]) far++; else if (s[0] === s[1] || s[1] === s[2]) blo++; });
+      var parts = [];
+      if (bar) parts.push(bar === 1 ? 'un lado completo de un solo color' : bar + ' lados completos');
+      if (far) parts.push(far === 1 ? 'un lado con faros (esquinas iguales, arista distinta)' : far + ' lados con faros (esquinas iguales, arista distinta)');
+      if (blo) parts.push(blo === 1 ? 'un bloque de 2 pegatinas iguales juntas' : blo + ' bloques de 2 pegatinas iguales juntas');
+      return 'Mirando los lados de la última capa: ' + (parts.length ? parts.join(', ') : 'ningún par de pegatinas iguales juntas ni faros') + '.';
+    }
+    var e = [1, 3, 5, 7].filter(function (i) { return d.u[i] === 'U'; }).length, k = [0, 2, 6, 8].filter(function (i) { return d.u[i] === 'U'; }).length;
+    if (c.kind === 'eo') return 'Arriba hay ' + (e === 0 ? 'ninguna arista amarilla' : e + ' aristas amarillas') + '. Las esquinas no importan en este paso.';
+    return 'Amarillo arriba: ' + e + (e === 1 ? ' arista' : ' aristas') + ' y ' + k + (k === 1 ? ' esquina' : ' esquinas') + ', además del centro.';
+  }
+
+  /* ---------- Cubo 3D ---------- */
+  var MK_R = { F: [1, 0, 0], B: [-1, 0, 0], R: [0, 0, -1], L: [0, 0, 1], U: [1, 0, 0], D: [1, 0, 0] };
+  var MK_UP = { F: [0, 1, 0], B: [0, 1, 0], R: [0, 1, 0], L: [0, 1, 0], U: [0, 0, -1], D: [0, 0, 1] };
+  /* opts.white: cubo con el blanco arriba (se usa fuera de OLL y PLL). La marca va siempre en el centro blanco. */
+  function Cube3D(host, opts) {
+    var self = this;
+    this.host = host; host.classList.add('c3d');
+    this.mf = opts && opts.white ? 'U' : 'D'; if (opts && opts.white) host.classList.add('blanca');
+    this.state = Cube.solved(); this.rx = -27; this.ry = -33; this.anims = [];
+    this.rot = h('div', { class: 'c3d-rot' }); host.appendChild(this.rot);
+    /* Etiqueta en el suelo, fija en la escena: el frente no depende de los colores */
+    this.rot.appendChild(h('div', { class: 'c3d-frente', 'aria-hidden': 'true', text: 'FRENTE' }));
+    this.cubies = [];
+    for (var x = -1; x <= 1; x++) for (var y = -1; y <= 1; y++) for (var z = -1; z <= 1; z++) {
+      if (!x && !y && !z) continue;
+      var c = h('div', { class: 'cubie' }); c._p = [x, y, z]; c._f = {};
+      for (var f in Cube.FACE_N) { var fe = h('div', { class: 'cf cf-' + f }); c._f[f] = fe; c.appendChild(fe); }
+      this.cubies.push(c); this.rot.appendChild(c);
+    }
+    this.resetMark(); this.layout(); this.view(); this.paint();
+    if (window.ResizeObserver) new ResizeObserver(function () { self.layout(); }).observe(host);
+    var drag = null;
+    host.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY }; try { host.setPointerCapture(e.pointerId); } catch (er) { } self.rot.style.transition = 'none'; });
+    host.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      self.ry += (e.clientX - drag.x) * 0.55; self.rx = Math.max(-85, Math.min(85, self.rx - (e.clientY - drag.y) * 0.55));
+      drag.x = e.clientX; drag.y = e.clientY; self.view();
+    });
+    ['pointerup', 'pointercancel'].forEach(function (n) { host.addEventListener(n, function () { drag = null; }); });
+  }
+  Cube3D.prototype.layout = function () {
+    var w = this.host.clientWidth; if (!w) return;
+    var S = Math.max(16, Math.floor(w / 5.6)); if (S === this.S) return; this.S = S;
+    this.host.style.setProperty('--s', S + 'px');
+    this.cubies.forEach(function (c) { c._base = 'translate3d(' + (c._p[0] * S) + 'px,' + (-c._p[1] * S) + 'px,' + (c._p[2] * S) + 'px)'; c.style.transform = c._base; });
+  };
+  Cube3D.prototype.view = function () { this.rot.style.transform = 'rotateX(' + this.rx.toFixed(1) + 'deg) rotateY(' + this.ry.toFixed(1) + 'deg)'; };
+  Cube3D.prototype.flip = function () {
+    var back = Math.cos(this.ry * Math.PI / 180) < 0;
+    this.rot.style.transition = 'transform .4s ease'; this.ry = back ? -33 : 147; this.rx = -27; this.view();
+  };
+  Cube3D.prototype.resetMark = function () {
+    var mf = this.mf, s = this.state.filter(function (x) { return x.c === mf && Math.abs(x.p[0]) + Math.abs(x.p[1]) + Math.abs(x.p[2]) === 1; })[0];
+    this.mp = s.p.slice(); this.mt = MK_UP[Cube.faceOfNormal(s.n)].slice();
+  };
+  Cube3D.prototype.paint = function () {
+    var ix = Cube.index(this.state), mf = this.mf, mt = this.mt;
+    this.cubies.forEach(function (c) {
+      for (var f in Cube.FACE_N) {
+        var n = Cube.FACE_N[f], out = c._p[0] * n[0] + c._p[1] * n[1] + c._p[2] * n[2] === 1;
+        if (out) c._f[f].dataset.c = ix[Cube.key(c._p, n)]; else delete c._f[f].dataset.c;
+        if (out && Math.abs(c._p[0]) + Math.abs(c._p[1]) + Math.abs(c._p[2]) === 1) {
+          var on = c._f[f].dataset.c === mf, r = MK_R[f], u = MK_UP[f];
+          c._f[f].classList.toggle('marca', on);
+          if (on) c._f[f].style.setProperty('--mr', Math.round(Math.atan2(mt[0] * r[0] + mt[1] * r[1] + mt[2] * r[2], mt[0] * u[0] + mt[1] * u[1] + mt[2] * u[2]) * 180 / Math.PI) + 'deg');
+        }
+      }
+    });
+  };
+  Cube3D.prototype.setState = function (st) { this.cancel(); this.state = st; this.resetMark(); this.paint(); };
+  Cube3D.prototype.cancel = function () { var a = this.anims; this.anims = []; a.forEach(function (x) { try { x.cancel(); } catch (e) { } }); };
+  Cube3D.prototype.move = function (m, dur) {
+    var self = this, def = Cube.MOVES[m.b];
+    function done() {
+      for (var k = 0; k < m.t; k++) if (def.l.indexOf(self.mp[def.a]) >= 0) { self.mp = Cube.rot(self.mp, def.a, def.d); self.mt = Cube.rot(self.mt, def.a, def.d); }
+      Cube.applyMove(self.state, m); self.paint();
+    }
+    if (!dur || !this.S || !this.host.animate) { done(); return Promise.resolve(); }
+    var turns = m.t === 3 ? -1 : m.t, phi = def.d * 90 * turns, css = def.a === 1 ? phi : -phi, ax = 'XYZ'.charAt(def.a);
+    var anims = this.cubies.filter(function (c) { return def.l.indexOf(c._p[def.a]) >= 0; }).map(function (c) {
+      return c.animate([{ transform: 'rotate' + ax + '(0deg) ' + c._base }, { transform: 'rotate' + ax + '(' + css + 'deg) ' + c._base }], { duration: dur * (m.t === 2 ? 1.45 : 1), easing: 'cubic-bezier(.35,.05,.3,1)' });
+    });
+    this.anims = anims;
+    return Promise.all(anims.map(function (a) { return a.finished; })).then(function () { if (self.anims === anims) { self.anims = []; done(); } else throw new Error('cancel'); });
+  };
+
+  /* Reproductor: lleva un algoritmo paso a paso sobre un cubo y marca el movimiento actual */
+  function Player(cube) { this.cube = cube; this.moves = []; this.i = 0; this.playing = false; this.busy = false; this.gen = 0; this.box = null; this.onstate = null; }
+  Player.prototype.load = function (state, moves, box) { this.gen++; this.playing = false; this.busy = false; this.start = Cube.clone(state); this.moves = moves; this.box = box; this.i = 0; this.cube.setState(Cube.clone(state)); this.mark(-1); this.emit(); };
+  Player.prototype.emit = function () { if (this.onstate) this.onstate(this); };
+  Player.prototype.mark = function (cur) {
+    if (!this.box) return; var i = this.i;
+    Array.prototype.forEach.call(this.box.querySelectorAll('.mv'), function (s) { var k = +s.dataset.i; s.classList.toggle('on', k === cur); s.classList.toggle('hecho', k < i && k !== cur); });
+  };
+  Player.prototype.step = function (dir) {
+    var self = this, g = this.gen;
+    if (this.busy) return Promise.resolve(false);
+    if (dir > 0 && this.i >= this.moves.length) return Promise.resolve(false);
+    if (dir < 0 && this.i <= 0) return Promise.resolve(false);
+    var k = dir > 0 ? this.i : this.i - 1, m = dir > 0 ? this.moves[k] : inv1(this.moves[k]);
+    this.busy = true; this.mark(k);
+    return this.cube.move(m, store.prefs.speed).then(function () {
+      if (g !== self.gen) return false;
+      self.busy = false; self.i += dir; self.mark(-1); self.emit(); return true;
+    }, function () { if (g === self.gen) self.busy = false; return false; });
+  };
+  Player.prototype.play = function () {
+    var self = this, g;
+    if (this.playing) { this.playing = false; this.stopAt = null; this.emit(); return; }
+    if (this.stopAt == null && this.i >= this.moves.length) this.reset();
+    g = this.gen; this.playing = true; this.emit();
+    (function loop() {
+      if (!self.playing || g !== self.gen) return;
+      if (self.i >= (self.stopAt != null ? self.stopAt : self.moves.length)) { self.playing = false; self.stopAt = null; self.emit(); return; }
+      self.step(1).then(function (ok) { if (ok) setTimeout(loop, store.prefs.speed ? 70 : 450); else if (g === self.gen) { self.playing = false; self.emit(); } });
+    })();
+  };
+  Player.prototype.goTo = function (k) {
+    this.gen++; this.playing = false; this.busy = false; this.stopAt = null;
+    var st = Cube.clone(this.start); for (var j = 0; j < k; j++) Cube.applyMove(st, this.moves[j]);
+    this.cube.setState(st); this.i = k; this.mark(-1); this.emit();
+  };
+  Player.prototype.playRange = function (s, e) { this.goTo(s); this.stopAt = e; this.play(); };
+  function bindGroups(box, pl) {
+    box.addEventListener('click', function (e) {
+      var g = e.target.closest && e.target.closest('.grp'); if (!g || !box.contains(g)) return;
+      pl.playRange(+g.dataset.s, +g.dataset.e);
+    });
+  }
+  Player.prototype.reset = function () { this.gen++; this.playing = false; this.busy = false; this.i = 0; this.cube.setState(Cube.clone(this.start)); this.mark(-1); this.emit(); };
+  Player.prototype.halt = function () { this.gen++; this.playing = false; this.busy = false; this.cube.cancel(); };
+  function controls(pl, withSpeed) {
+    var bPlay = fixedBtn('btn pri', [['play', 'Reproducir'], ['seguir', 'Seguir'], ['pausa', 'Pausa']], function () { pl.play(); });
+    var bPrev = h('button', { class: 'btn', 'aria-label': 'Paso atrás', html: ICON.prev, onclick: function () { pl.playing = false; pl.step(-1); } });
+    var bNext = h('button', { class: 'btn', 'aria-label': 'Paso adelante', html: ICON.next, onclick: function () { pl.playing = false; pl.step(1); } });
+    var bReset = h('button', { class: 'btn', 'aria-label': 'Volver al inicio', html: ICON.reset, onclick: function () { pl.reset(); } });
+    var kids = [bReset, bPrev, bPlay, bNext];
+    if (withSpeed) {
+      var sel = h('select', { id: 'vel-' + withSpeed, 'aria-label': 'Velocidad', onchange: function () { store.prefs.speed = +sel.value; touch(); } },
+        [['900', 'Muy lento'], ['620', 'Lento'], ['420', 'Normal'], ['240', 'Rápido'], ['0', 'Sin animación']].map(function (o) { return h('option', { value: o[0], text: o[1] }); }));
+      sel.value = String(store.prefs.speed); if (!sel.value) sel.value = '420';
+      kids.push(sel);
+    }
+    pl.onstate = function () {
+      if (pl.playing) bPlay.show('pausa', ICON.pause); else bPlay.show(pl.i > 0 && pl.i < pl.moves.length ? 'seguir' : 'play', ICON.play);
+      bPrev.disabled = pl.i <= 0; bNext.disabled = pl.i >= pl.moves.length; bReset.disabled = pl.i <= 0;
+    };
+    pl.onstate();
+    return h('div', { class: 'ctrl' }, kids);
+  }
+  /* Botón que cambia de texto sin cambiar de ancho: mide siempre la etiqueta más larga */
+  function fixedBtn(cls, labels, onclick) {
+    var ic = h('span', { class: 'ic' }), box = h('span', { class: 'lbls' }), map = {};
+    labels.forEach(function (l) { map[l[0]] = h('span', { html: l[1] }); box.appendChild(map[l[0]]); });
+    var b = h('button', { class: cls, onclick: onclick }, [ic, box]);
+    b.show = function (k, icon) {
+      ic.innerHTML = icon || ''; ic.hidden = !icon;
+      for (var x in map) map[x].classList.toggle('on', x === k);
+      b.setAttribute('aria-label', map[k].textContent.trim());
+    };
+    return b;
+  }
+  function fmt(ms) { return ms ? (ms / 1000).toFixed(2) : '—'; }
+  var toastT = 0;
+  function toast(t) { var el = $('#toast'); el.textContent = t; el.classList.add('ver'); clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove('ver'); }, 3200); }
+
+  /* ---------- Vista: Casos ---------- */
+  var ui = { stage: 1, status: -1, view: 'casos' };
+  function stageCases(n) { return CASES.filter(function (c) { return c.e === n; }); }
+  function renderRuta() {
+    var box = $('#ruta'); box.textContent = '';
+    STAGES.forEach(function (s) {
+      var cs = stageCases(s.n), ok = cs.filter(function (c) { return peek(c.id).s === 2; }).length, lr = cs.filter(function (c) { return peek(c.id).s === 1; }).length;
+      box.appendChild(h('button', { class: 'etapa', 'aria-pressed': ui.stage === s.n ? 'true' : 'false', onclick: function () { ui.stage = ui.stage === s.n ? 0 : s.n; renderCasos(); } }, [
+        h('span', { class: 'eyebrow', text: 'Etapa ' + s.n + ' · ' + s.sub }), h('b', { text: s.t }),
+        h('span', { class: 'meter', 'aria-hidden': 'true' }, [h('span', { class: 'm-ok', style: 'width:' + (100 * ok / cs.length) + '%' }), h('span', { class: 'm-warn', style: 'width:' + (100 * lr / cs.length) + '%' })]),
+        h('span', { class: 'cnt', text: ok + ' de ' + cs.length + ' dominados' + (lr ? ' · ' + lr + ' en curso' : '') })
+      ]));
+    });
+  }
+  function renderCasos() {
+    renderRuta();
+    var como = $('#como'); como.textContent = '';
+    if (ui.stage) { var s = STAGES[ui.stage - 1]; como.appendChild(h('h2', { text: 'Etapa ' + s.n + ': ' + s.t })); como.appendChild(h('p', { html: s.how })); }
+    else {
+      var tot = CASES.filter(function (c) { return peek(c.id).s === 2; }).length;
+      como.appendChild(h('h2', { text: 'Las seis etapas' }));
+      como.appendChild(h('p', { text: 'Llevas ' + tot + ' de ' + CASES.length + ' algoritmos dominados. Toca una etapa para ver solo sus casos y cómo abordarla.' }));
+    }
+    var fl = $('#filtros'); fl.textContent = '';
+    [[-1, 'Todos'], [0, 'Sin empezar'], [1, 'Aprendiendo'], [2, 'Dominados']].forEach(function (f) {
+      fl.appendChild(h('button', { class: 'chip', 'aria-pressed': ui.status === f[0] ? 'true' : 'false', text: f[1], onclick: function () { ui.status = f[0]; renderCasos(); } }));
+    });
+    fl.appendChild(h('span', { class: 'leyenda', html: '<span><i class="dot" data-s="0"></i>Sin empezar</span><span><i class="dot" data-s="1"></i>Aprendiendo</span><span><i class="dot" data-s="2"></i>Dominado</span>' }));
+    var list = $('#lista'); list.textContent = '';
+    var shown = CASES.filter(function (c) { return (!ui.stage || c.e === ui.stage) && (ui.status < 0 || peek(c.id).s === ui.status); });
+    if (!shown.length) { list.appendChild(h('div', { class: 'vacio' }, [h('p', { text: 'No hay casos con ese estado en esta etapa.' }), h('button', { class: 'btn', text: 'Ver todos', onclick: function () { ui.status = -1; renderCasos(); } })])); return; }
+    GROUP_ORDER.forEach(function (g) {
+      var cs = shown.filter(function (c) { return c.g === g; }); if (!cs.length) return;
+      var grid = h('div', { class: 'casos' });
+      cs.forEach(function (c) {
+        var p = peek(c.id), alg = algOf(c);
+        grid.appendChild(h('button', { class: 'caso', onclick: function () { openDetalle(c); } }, [
+          h('span', { html: diagram(c, alg) }),
+          h('span', { class: 'nm' }, [c.kind === 'eo' ? c.short.charAt(0).toUpperCase() + c.short.slice(1) : c.label, c.n ? h('span', { class: 'ap', text: c.n }) : null, guiaTag(c, alg)]),
+          h('i', { class: 'dot', 'data-s': p.s, role: 'img', 'aria-label': ESTADO[p.s] }),
+          h('span', { class: 'alg', text: grpText(Cube.parse(alg), cutsOf(c, alg)) })
+        ]));
+      });
+      list.appendChild(h('div', { class: 'grupo' }, [h('div', { class: 'grupo-h' }, [h('h3', { text: GROUPS[g][0] }), GROUPS[g][1] ? h('p', { text: GROUPS[g][1] }) : null]), grid]));
+    });
+  }
+
+  /* ---------- Detalle de un caso ---------- */
+  var dlg = $('#detalle'), det = { c: null, cube: null, pl: null };
+  function openDetalle(c) {
+    if (det.c !== c) det.edit = false;
+    det.c = c;
+    if (!det.cube) { det.host = h('div'); det.cube = new Cube3D(det.host); det.pl = new Player(det.cube); }
+    renderDetalle();
+    if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); }
+    dlg.scrollTop = 0; fitDetPlay(); det.cube.layout();
+  }
+  /* Escritorio: el cubo usa el alto que deja libre el algoritmo; si no alcanza, el panel crece */
+  function fitDetPlay() {
+    var play = document.querySelector('#detalle .det-play'); if (!play) return;
+    var esc = play.querySelector('.escena'); if (!esc) return;
+    if (window.innerWidth < 861) { esc.style.height = ''; return; }
+    var rest = 0; Array.prototype.forEach.call(play.children, function (ch) { if (ch !== esc) rest += ch.getBoundingClientRect().height; });
+    var gaps = 12 * (play.children.length - 1), pad = 30;
+    esc.style.height = Math.max(190, window.innerHeight - 72 - pad - gaps - rest) + 'px';
+  }
+  window.addEventListener('resize', function () { if (dlg.open) fitDetPlay(); });
+  function closeDetalle() { if (det.pl) det.pl.halt(); if (dlg.open) dlg.close(); }
+  dlg.addEventListener('close', function () { if (det.pl) det.pl.halt(); });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) closeDetalle(); });
+  function renderDetalle() {
+    var c = det.c, p = peek(c.id), alg = algOf(c), su = setupOf(alg), moves = Cube.parse(alg), box = $('#det');
+    det.pl.halt(); box.textContent = '';
+    var cuts = cutsOf(c, alg), algo = algoEl(moves, null, null, cuts);
+    det.pl.load(viewState(c, su.state), moves, algo);
+    bindGroups(algo, det.pl);
+    var trigs = []; trigBlocks(moves).forEach(function (b) { if (trigs.indexOf(b.n) < 0) trigs.push(b.n); });
+    box.appendChild(h('div', { class: 'det-h' }, [
+      h('span', { html: diagram(c, alg) }),
+      h('div', null, [h('p', { class: 'eyebrow', text: GROUPS[c.g][0] }), h('h2', { id: 'det-nombre', text: c.label + (c.n ? ' · ' + c.n : '') }), c.freq ? h('p', { class: 'nota', text: 'Aparece en 1 de cada ' + c.freq + ' resoluciones.' }) : null]),
+      h('button', { class: 'btn sm x', 'aria-label': 'Cerrar', html: ICON.x, onclick: closeDetalle })
+    ]));
+    var play = h('div', { class: 'det-play' }), info = h('div', { class: 'det-info' });
+    box.appendChild(play); box.appendChild(info);
+    play.appendChild(h('div', { class: 'escena' }, [det.host]));
+    play.appendChild(h('div', { class: 'bajo-cubo' }, [h('span', { text: 'FRENTE marca la cara F, la que te mira. Arrastra para girar.' }), h('button', { class: 'btn sm', text: 'Ver por detrás', onclick: function () { det.cube.flip(); } })]));
+    play.appendChild(h('div', { class: 'bloque' }, [
+      h('div', { class: 'eb-fila' }, [h('p', { class: 'eyebrow eb-guia' }, ['Algoritmo · ' + moves.length + ' movimientos', guiaTag(c, alg)]),
+        h('button', { class: 'btn sm', text: det.edit ? 'Listo' : (cuts ? 'Editar secciones' : 'Agrupar en secciones'), onclick: function () { det.edit = !det.edit; renderDetalle(); } })]),
+      det.edit ? grpEditor(c, alg, moves) : algo,
+      det.edit ? null : (cuts ? h('p', { class: 'nota', text: 'Toca una sección para verla sola en el cubo, desde su inicio. Así puedes repetirla hasta que te salga.' }) : null),
+      det.edit ? null : controls(det.pl, 'det'),
+      h('p', { class: 'nota teclas-hint', text: 'Con el teclado: ← y → paso a paso, Espacio reproduce o pausa.' })
+    ]));
+    if (trigs.length) info.appendChild(h('div', { class: 'bloque' }, [h('p', { class: 'eyebrow', text: 'Gatillos' }), h('p', { class: 'nota', text: (cuts ? 'Este algoritmo contiene: ' : 'Subrayado en el algoritmo: ') + trigs.join(', ') + '. Son secuencias que se repiten en muchos casos; apréndelas como un solo gesto.' })]));
+    info.appendChild(h('div', { class: 'bloque' }, [h('p', { class: 'eyebrow', text: 'Cómo reconocerlo' }), h('p', { text: facts(c, alg) })]));
+    info.appendChild(h('div', { class: 'bloque' }, [
+      h('p', { class: 'eyebrow', text: 'Para armarlo en tu cubo' }), h('p', { class: 'mono', style: 'font-weight:600;overflow-wrap:anywhere', text: Cube.str(su.moves) }),
+      h('p', { class: 'nota', text: 'Parte con el cubo resuelto, amarillo arriba y verde al frente.' })
+    ]));
+    var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'Estado' }, ESTADO.map(function (t, i) {
+      return h('button', { 'data-s': i, 'aria-pressed': p.s === i ? 'true' : 'false', text: t, onclick: function () { var q = P(c.id); q.s = i; if (i !== 2) q.streak = 0; touch(); renderDetalle(); renderCasos(); } });
+    }));
+    var avg = p.last.length ? p.last.slice(-5).reduce(function (a, b) { return a + b; }, 0) / Math.min(5, p.last.length) : 0;
+    info.appendChild(h('div', { class: 'bloque' }, [h('p', { class: 'eyebrow', text: 'Tu progreso' }), seg,
+      h('dl', { class: 'datos' }, [
+        h('div', null, [h('dt', { text: 'Intentos' }), h('dd', { text: String(p.n) })]),
+        h('div', null, [h('dt', { text: 'Mejor (s)' }), h('dd', { text: fmt(p.best) })]),
+        h('div', null, [h('dt', { text: 'Media últimos 5 (s)' }), h('dd', { text: fmt(avg) })])
+      ]),
+      h('button', { class: 'btn pri', text: 'Practicar este caso', onclick: function () { closeDetalle(); practiceOnly(c); } })
+    ]));
+    /* Alternativas */
+    if (c.guiaNota && guiaDe(c, alg)) info.appendChild(h('div', { class: 'bloque' }, [h('p', { class: 'eyebrow', text: 'Nota sobre tu guía' }), h('p', { class: 'nota', text: c.guiaNota })]));
+    var list = [c.a].concat(c.alt || []), cur = Cube.str(moves), msg = h('p', { class: 'msg', role: 'status' });
+    if (list.map(function (a) { return Cube.str(Cube.parse(a)); }).indexOf(cur) < 0) list.push(alg);
+    var alts = h('div', { class: 'alts' }, list.map(function (a) {
+      var txt = Cube.str(Cube.parse(a));
+      return h('button', { class: 'alt', 'aria-pressed': txt === cur ? 'true' : 'false', onclick: function () { P(c.id).alg = a === c.a ? '' : a; touch(); renderDetalle(); renderCasos(); } }, [h('i'), h('span', { text: grpText(Cube.parse(a), cutsOf(c, a)) }), guiaTag(c, a)]);
+    }));
+    var kids = [h('p', { class: 'eyebrow', text: list.length > 1 ? 'Elige tu algoritmo' : 'Tu propio algoritmo' }), list.length > 1 ? alts : null];
+    if (c.kind !== 'eo') {
+      var inp = h('input', { type: 'text', id: 'alg-propio', placeholder: "Escribe otro, p. ej. R U R' U'…", 'aria-label': 'Algoritmo propio', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false' });
+      var use = function () {
+        var txt = inp.value.trim(), ms = Cube.parse(txt);
+        msg.className = 'msg bad';
+        if (!ms.length) { msg.textContent = 'Escribe los movimientos separados por espacios.'; return; }
+        var r = Cube.check(txt, c.kind);
+        if (!r.ok) { msg.textContent = (isF2L(c) ? 'Ese algoritmo no resuelve este paso de F2L: desarma otras piezas ya colocadas o no deja la pareja en su sitio.' : 'Ese algoritmo no resuelve un caso de ' + (c.kind === 'oll' ? 'OLL' : 'PLL') + ': desarma las dos primeras capas o no deja la cara como corresponde.'); return; }
+        if (r.sig !== c.sig) { var o = CASES.filter(function (x) { return x.sig === r.sig; })[0]; msg.textContent = 'Ese algoritmo resuelve otro caso' + (o ? ' (' + o.label + ')' : '') + ', no este.'; return; }
+        P(c.id).alg = Cube.str(ms); touch(); renderDetalle(); renderCasos(); toast('Algoritmo cambiado para ' + c.label);
+      };
+      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); use(); } });
+      kids.push(h('div', { class: 'campo' }, [inp, h('button', { class: 'btn', text: 'Usar', onclick: use })]));
+      kids.push(msg);
+      kids.push(h('p', { class: 'nota', text: 'Se comprueba en el simulador antes de guardarlo: solo se acepta si resuelve este mismo caso.' }));
+    }
+    info.appendChild(h('div', { class: 'bloque' }, kids));
+    if (dlg.open) requestAnimationFrame(fitDetPlay);
+  }
+
+  function detKey(e) { return dlg.open && !e.metaKey && !e.ctrlKey && !e.altKey && !/^(INPUT|SELECT|TEXTAREA)$/.test((e.target && e.target.tagName) || ''); }
+  document.addEventListener('keydown', function (e) {
+    if (!detKey(e) || !det.pl) return;
+    if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); if (!e.repeat) det.pl.play(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); det.pl.playing = false; det.pl.step(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); det.pl.playing = false; det.pl.step(-1); }
+  });
+  document.addEventListener('keyup', function (e) { if (detKey(e) && (e.code === 'Space' || e.key === ' ')) e.preventDefault(); });
+
+  /* Editor de secciones: tocar el espacio entre dos movimientos separa o une */
+  function grpEditor(c, alg, moves) {
+    var cuts = (cutsOf(c, alg) || []).slice(), wrap = h('div', { class: 'bloque' }), ed = h('div', { class: 'algo editando' });
+    function paint() {
+      ed.textContent = '';
+      moves.forEach(function (m, i) {
+        if (i > 0) {
+          var on = cuts.indexOf(i) >= 0;
+          ed.appendChild(h('button', { class: 'corte' + (on ? ' on' : ''), 'aria-label': (on ? 'Unir' : 'Separar') + ' antes de ' + Cube.tok(m) + ' (movimiento ' + (i + 1) + ')', 'aria-pressed': on ? 'true' : 'false', onclick: function () {
+            var k = cuts.indexOf(i); if (k >= 0) cuts.splice(k, 1); else cuts.push(i);
+            setCuts(c, alg, cuts); paint(); renderCasos();
+          } }));
+        }
+        ed.appendChild(h('span', { class: 'mv', text: Cube.tok(m) }));
+      });
+      cnt.textContent = (cuts.length + 1) + (cuts.length ? ' secciones' : ' sección (sin separar)');
+    }
+    var cnt = h('span', { class: 'nota' });
+    wrap.appendChild(h('p', { class: 'nota', text: 'Toca el espacio entre dos movimientos para separar o unir. Cada sección es un trozo para aprender por separado; se guarda con tu progreso.' }));
+    wrap.appendChild(ed);
+    wrap.appendChild(h('div', { class: 'acc' }, [
+      h('button', { class: 'btn sm', text: 'Sugerir con los gatillos', onclick: function () { cuts = trigCuts(moves); setCuts(c, alg, cuts); paint(); renderCasos(); } }),
+      h('button', { class: 'btn sm', text: 'Partir en mitades', onclick: function () { cuts = [Math.ceil(moves.length / 2)]; setCuts(c, alg, cuts); paint(); renderCasos(); } }),
+      h('button', { class: 'btn sm', text: 'Quitar secciones', onclick: function () { cuts = []; setCuts(c, alg, cuts); paint(); renderCasos(); } }),
+      cnt
+    ]));
+    paint();
+    return wrap;
+  }
+
+  /* ---------- Vista: Practicar ---------- */
+  var pr = { cube: null, pl: null, cur: null, phase: 'idle', t0: 0, ms: null, raf: 0, revealed: false, last: null, session: [], only: null, els: {} };
+  function baseOptions() {
+    var nl = CASES.filter(function (c) { return peek(c.id).s === 1; }).length;
+    return [['aprendiendo', 'Los que estoy aprendiendo (' + nl + ')']].concat(STAGES.map(function (s) { return ['e' + s.n, 'Etapa ' + s.n + ' · ' + s.t]; }), [['f2l', 'Todo F2L (41)'], ['oll', 'Todo OLL (57)'], ['pll', 'Todo PLL (21)']]);
+  }
+  function casesOf(v) {
+    if (v === 'aprendiendo') return CASES.filter(function (c) { return peek(c.id).s === 1; });
+    if (v === 'f2l' || v === 'oll' || v === 'pll') return CASES.filter(function (c) { return c.kind === v; });
+    return stageCases(+String(v).slice(1));
+  }
+  function setOptions() {
+    var sel = $('#pr-set'), nl = CASES.filter(function (c) { return peek(c.id).s === 1; }).length, v = store.prefs.set;
+    var opts = baseOptions();
+    if (pr.only) opts.push(['uno', 'Solo ' + pr.only.label]);
+    sel.textContent = ''; opts.forEach(function (o) { sel.appendChild(h('option', { value: o[0], text: o[1] })); });
+    if (!v || (v === 'uno' && !pr.only)) v = nl ? 'aprendiendo' : 'e1';
+    sel.value = v; store.prefs.set = v;
+  }
+  function pool() {
+    var v = store.prefs.set;
+    if (v === 'uno' && pr.only) return [pr.only];
+    if (v === 'aprendiendo') return CASES.filter(function (c) { return peek(c.id).s === 1; });
+    if (v === 'f2l') return CASES.filter(function (c) { return c.kind === 'f2l'; });
+    if (v === 'oll') return CASES.filter(function (c) { return c.kind === 'oll'; });
+    if (v === 'pll') return CASES.filter(function (c) { return c.kind === 'pll'; });
+    return stageCases(+v.slice(1));
+  }
+  function practiceOnly(c) { pr.only = c; store.prefs.set = 'uno'; setView('practicar'); setOptions(); nextCase(); }
+  function pick(list) {
+    var cand = list.length > 1 && pr.last ? list.filter(function (c) { return c !== pr.last; }) : list;
+    var tot = cand.reduce(function (s, c) { return s + (peek(c.id).w || 3); }, 0), r = Math.random() * tot;
+    for (var i = 0; i < cand.length; i++) { r -= (peek(cand[i].id).w || 3); if (r <= 0) return cand[i]; }
+    return cand[cand.length - 1];
+  }
+  function rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function stopTimer() { cancelAnimationFrame(pr.raf); pr.phase = 'idle'; }
+  function nextCase() {
+    stopTimer(); if (pr.pl) pr.pl.halt();
+    var list = pool(), body = $('#pr-cuerpo'); body.textContent = '';
+    if (!list.length) {
+      pr.cur = null;
+      body.appendChild(h('div', { class: 'vacio' }, [
+        h('h3', { text: 'Todavía no hay casos marcados como «Aprendiendo»' }),
+        h('p', { class: 'nota', text: 'Abre un caso en la pestaña Casos y márcalo, o practica una etapa completa.' }),
+        h('div', { class: 'acc' }, [h('button', { class: 'btn pri', text: 'Practicar la etapa 1', onclick: function () { store.prefs.set = 'e1'; touch(); setOptions(); nextCase(); } }), h('button', { class: 'btn', text: 'Ir a Casos', onclick: function () { setView('casos'); } })])
+      ]));
+      return;
+    }
+    var c = pick(list), alg = algOf(c), moves = Cube.parse(alg), pre = '', post = '';
+    if (store.prefs.auf) { post = rnd(['', 'U', "U'", 'U2']); if (c.kind === 'pll' && !Cube.caseState(alg).prefix) pre = rnd(['', 'U', "U'", 'U2']); }
+    var su = setupOf(alg, pre, post), lead = Cube.invert(Cube.parse(post)), tail = Cube.invert(Cube.parse(pre));
+    pr.last = c; pr.cur = { c: c, alg: alg, su: su, lead: lead, tail: tail, all: lead.concat(moves, tail), moves: moves };
+    pr.ms = null; pr.revealed = false; pr.phase = 'ready';
+    if (!pr.cube) { pr.host = h('div'); pr.cube = new Cube3D(pr.host); pr.pl = new Player(pr.cube); }
+    pr.cube.setState(viewState(c, Cube.clone(su.state)));
+    var E = pr.els = {};
+    E.crono = h('div', { class: 'crono', 'data-f': 'ready', 'aria-live': 'off', text: '0.00' });
+    E.go = fixedBtn('btn pri', [['ir', 'Empezar <kbd>Espacio</kbd>'], ['parar', 'Detener <kbd>Espacio</kbd>']], function () { blurAct(); toggleTimer(); });
+    E.ver = h('button', { class: 'btn', text: 'Ver algoritmo', onclick: function () { blurAct(); reveal(); } });
+    E.skip = h('button', { class: 'btn', text: 'Saltar', onclick: function () { blurAct(); nextCase(); } });
+    E.rev = h('div', { class: 'revela', hidden: true });
+    E.eval = h('div', { class: 'eval', hidden: true }, [h('p', { class: 'eyebrow', text: '¿Cómo te fue?' }), h('div', { class: 'acc' }, [
+      h('button', { class: 'btn e-ok', html: 'Lo sabía <kbd>1</kbd>', onclick: function () { rate(0); } }),
+      h('button', { class: 'btn e-warn', html: 'Dudé <kbd>2</kbd>', onclick: function () { rate(1); } }),
+      h('button', { class: 'btn e-bad', html: 'No lo recordé <kbd>3</kbd>', onclick: function () { rate(2); } })
+    ])]);
+    body.appendChild(h('div', { class: 'pr' }, [
+      h('div', { class: 'pr-izq' }, [h('div', { class: 'escena' }, [pr.host]), h('div', { class: 'bajo-cubo' }, [h('span', { text: 'Así debe quedar tu cubo' }), h('button', { class: 'btn sm', text: 'Ver por detrás', onclick: function () { pr.cube.flip(); } })])]),
+      h('div', { class: 'pr-der' }, [
+        h('div', { class: 'bloque' }, [h('p', { class: 'eyebrow', text: 'Mezcla para armar el caso' }), h('p', { class: 'mezcla', text: Cube.str(su.moves) }), h('p', { class: 'nota', text: 'Parte con el cubo resuelto, amarillo arriba y verde al frente.' })]),
+        E.crono, h('div', { class: 'acc' }, [E.go, E.ver, E.skip]), E.rev, E.eval
+      ])
+    ]));
+    pr.cube.layout(); paintGo();
+  }
+  function blurAct() { try { document.activeElement && document.activeElement.blur(); } catch (e) { } }
+  function paintGo() {
+    var E = pr.els; if (!E.go) return;
+    E.go.show(pr.phase === 'running' ? 'parar' : 'ir');
+    E.go.disabled = pr.phase === 'done'; E.crono.dataset.f = pr.phase;
+  }
+  function toggleTimer() {
+    if (!pr.cur) return;
+    if (pr.phase === 'ready') {
+      pr.phase = 'running'; pr.t0 = performance.now(); paintGo();
+      (function tick() { if (pr.phase !== 'running') return; pr.els.crono.textContent = ((performance.now() - pr.t0) / 1000).toFixed(2); pr.raf = requestAnimationFrame(tick); })();
+    } else if (pr.phase === 'running') {
+      var ms = performance.now() - pr.t0; cancelAnimationFrame(pr.raf); pr.phase = 'done';
+      pr.ms = pr.revealed ? null : Math.round(ms); pr.els.crono.textContent = (ms / 1000).toFixed(2); paintGo(); reveal();
+    }
+  }
+  function reveal() {
+    var E = pr.els, cu = pr.cur; if (!cu || !E.rev) return;
+    if (pr.phase === 'running') { cancelAnimationFrame(pr.raf); pr.phase = 'done'; pr.ms = null; paintGo(); }
+    if (!pr.revealed) {
+      pr.revealed = true; E.rev.textContent = '';
+      var algo = algoEl(cu.moves, cu.lead, cu.tail, cutsOf(cu.c, cu.alg));
+      pr.pl.load(viewState(cu.c, cu.su.state), cu.all, algo);
+      bindGroups(algo, pr.pl);
+      E.rev.appendChild(h('div', { class: 'quien' }, [h('b', { text: cu.c.label + (cu.c.n ? ' · ' + cu.c.n : '') }), h('span', { class: 'nota', text: GROUPS[cu.c.g][0] }), guiaTag(cu.c, cu.alg)]));
+      E.rev.appendChild(algo);
+      if (cu.lead.length || cu.tail.length) E.rev.appendChild(h('p', { class: 'nota', text: 'Entre paréntesis: el ajuste de la capa de arriba que pide este ángulo.' }));
+      E.rev.appendChild(controls(pr.pl, false));
+    }
+    E.rev.hidden = false; E.eval.hidden = false; E.ver.disabled = true;
+  }
+  function rate(r) {
+    var cu = pr.cur; if (!cu || pr.els.eval.hidden) return;
+    var c = cu.c, p = P(c.id);
+    p.n++;
+    if (r === 0) { p.ok++; p.streak++; p.w = Math.max(1, p.w - 1); } else { p.streak = 0; p.w = Math.min(8, p.w + (r === 1 ? 1 : 3)); }
+    if (pr.ms && r !== 2) { p.last.push(pr.ms); p.last = p.last.slice(-12); if (!p.best || pr.ms < p.best) p.best = pr.ms; }
+    if (p.s === 0) p.s = 1;
+    if (r === 0 && p.streak >= 5 && p.s !== 2) { p.s = 2; toast(c.label + ' pasa a Dominado: 5 aciertos seguidos'); }
+    else if (r === 2 && p.s === 2) { p.s = 1; toast(c.label + ' vuelve a Aprendiendo'); }
+    pr.session.unshift({ label: c.label + (c.n ? ' · ' + c.n : ''), ms: r !== 2 ? pr.ms : null, r: r });
+    touch(); renderSesion(); setOptions(); nextCase();
+  }
+  function renderSesion() {
+    var box = $('#sesion'); box.textContent = ''; if (!pr.session.length) return;
+    var ok = pr.session.filter(function (s) { return s.r === 0; }).length;
+    box.appendChild(h('p', { class: 'eyebrow', text: 'Esta sesión · ' + pr.session.length + (pr.session.length === 1 ? ' intento' : ' intentos') + ' · ' + ok + (ok === 1 ? ' sabido' : ' sabidos') }));
+    box.appendChild(h('ol', null, pr.session.slice(0, 10).map(function (s) {
+      return h('li', null, [h('span', { text: s.label }), h('span', { text: s.ms ? fmt(s.ms) : '—' }), h('span', { class: 'pill', 'data-r': s.r, text: ['Lo sabía', 'Dudé', 'No lo recordé'][s.r] })]);
+    })));
+  }
+  $('#pr-set').addEventListener('change', function (e) { store.prefs.set = e.target.value; touch(); nextCase(); });
+  $('#pr-auf').addEventListener('change', function (e) { store.prefs.auf = e.target.checked; touch(); nextCase(); });
+  function prKey(e) {
+    if (ui.view !== 'practicar' || dlg.open || aj.dlg.open || e.metaKey || e.ctrlKey || e.altKey) return false;
+    return !/^(INPUT|SELECT|TEXTAREA)$/.test((e.target && e.target.tagName) || '');
+  }
+  document.addEventListener('keydown', function (e) {
+    if (!prKey(e)) return;
+    if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); if (!e.repeat) toggleTimer(); }
+    else if (e.key === '1' || e.key === '2' || e.key === '3') rate(+e.key - 1);
+  });
+  /* Espacio es del cronómetro: evita que además active el botón que tenga el foco */
+  document.addEventListener('keyup', function (e) { if (prKey(e) && (e.code === 'Space' || e.key === ' ')) e.preventDefault(); });
+
+  /* ---------- Vista: Tarjetas ---------- */
+  var fc = { cur: null, last: null, rot: 0, open: false, n: 0, ok: 0, els: null };
+  function fcOptions() {
+    var sel = $('#fc-set'), v = store.prefs.fcset, opts = baseOptions();
+    sel.textContent = ''; opts.forEach(function (o) { sel.appendChild(h('option', { value: o[0], text: o[1] })); });
+    if (!v || !opts.some(function (o) { return o[0] === v; })) v = casesOf('aprendiendo').length ? 'aprendiendo' : 'e' + (ui.stage || 2);
+    sel.value = v; store.prefs.fcset = v; $('#fc-girar').checked = !!store.prefs.fcrot;
+  }
+  function fcSetLabel(c) { return isF2L(c) ? 'F2L' : c.kind === 'pll' ? 'PLL' : 'OLL'; }
+  function fcNext() {
+    var list = casesOf(store.prefs.fcset), box = $('#fc-cuerpo'); box.textContent = '';
+    if (!list.length) {
+      fc.cur = null;
+      box.appendChild(h('div', { class: 'vacio' }, [h('h3', { text: 'No hay casos en este grupo' }), h('p', { class: 'nota', text: 'Marca casos como «Aprendiendo» en la pestaña Casos, o elige una etapa.' })]));
+      return;
+    }
+    var cand = list.length > 1 && fc.last ? list.filter(function (c) { return c !== fc.last; }) : list;
+    var tot = cand.reduce(function (s, c) { return s + (peek(c.id).w || 3); }, 0), r = Math.random() * tot, c = cand[cand.length - 1];
+    for (var i = 0; i < cand.length; i++) { r -= (peek(cand[i].id).w || 3); if (r <= 0) { c = cand[i]; break; } }
+    fc.cur = c; fc.last = c; fc.open = false;
+    fc.rot = store.prefs.fcrot && !isF2L(c) ? Math.floor(Math.random() * 4) * 90 : 0;
+    var alg = algOf(c), moves = Cube.parse(alg);
+    var front = h('div', { class: 'cara frente' }, [
+      h('p', { class: 'eyebrow', text: fcSetLabel(c) + ' · ¿qué algoritmo es?' }),
+      h('span', { class: 'fc-dg', html: diagram(c, alg), style: fc.rot ? 'transform:rotate(' + fc.rot + 'deg)' : null }),
+      h('p', { class: 'nota', text: 'Toca la tarjeta para ver la respuesta' })
+    ]);
+    var back = h('div', { class: 'cara dorso' }, [
+      h('p', { class: 'eyebrow', text: GROUPS[c.g][0] }),
+      h('h2', { text: c.label + (c.n ? ' · ' + c.n : '') }), guiaTag(c, alg),
+      algoEl(moves, null, null, cutsOf(c, alg)),
+      fc.rot ? h('div', { class: 'fc-pos' }, [h('span', { class: 'fc-mini', html: diagram(c, alg) }), h('p', { class: 'nota', text: 'Antes de empezar, gira la capa de arriba hasta dejar el caso así.' })]) : null
+    ]);
+    var card = h('button', { class: 'flash', 'aria-label': 'Mostrar la respuesta', onclick: function () { blurAct(); fcFlip(); } }, [h('div', { class: 'flash-in' }, [front, back])]);
+    var acc = h('div', { class: 'fc-acc' });
+    box.appendChild(card); box.appendChild(acc);
+    fc.els = { card: card, acc: acc };
+    fcPaint();
+  }
+  function fcPaint() {
+    var E = fc.els; if (!E) return;
+    E.card.classList.toggle('vuelta', fc.open);
+    E.card.setAttribute('aria-label', fc.open ? 'Ocultar la respuesta' : 'Mostrar la respuesta');
+    E.acc.textContent = '';
+    if (!fc.open) {
+      E.acc.appendChild(h('button', { class: 'btn pri', html: 'Ver respuesta <kbd>Espacio</kbd>', onclick: function () { blurAct(); fcFlip(); } }));
+      E.acc.appendChild(h('button', { class: 'btn', html: 'Otra <kbd>→</kbd>', onclick: function () { blurAct(); fcNext(); } }));
+    } else {
+      E.acc.appendChild(h('button', { class: 'btn e-bad', html: 'No la sabía <kbd>1</kbd>', onclick: function () { fcRate(false); } }));
+      E.acc.appendChild(h('button', { class: 'btn e-ok', html: 'La sabía <kbd>2</kbd>', onclick: function () { fcRate(true); } }));
+      E.acc.appendChild(h('button', { class: 'btn', text: 'Verla animada', onclick: function () { openDetalle(fc.cur); } }));
+    }
+    $('#fc-sesion').textContent = fc.n ? 'Esta sesión: ' + fc.n + (fc.n === 1 ? ' tarjeta' : ' tarjetas') + ', ' + fc.ok + (fc.ok === 1 ? ' sabida' : ' sabidas') + '.' : '';
+  }
+  function fcFlip() { if (!fc.cur) return; fc.open = !fc.open; fcPaint(); }
+  function fcRate(ok) {
+    if (!fc.cur || !fc.open) return;
+    var p = P(fc.cur.id); p.w = ok ? Math.max(1, p.w - 1) : Math.min(8, p.w + 2);
+    fc.n++; if (ok) fc.ok++; touch(); blurAct(); fcNext();
+  }
+  $('#fc-set').addEventListener('change', function (e) { store.prefs.fcset = e.target.value; touch(); fcNext(); });
+  $('#fc-girar').addEventListener('change', function (e) { store.prefs.fcrot = e.target.checked; touch(); fcNext(); });
+  function fcKey(e) { return ui.view === 'tarjetas' && !dlg.open && !aj.dlg.open && !e.metaKey && !e.ctrlKey && !e.altKey && !/^(INPUT|SELECT|TEXTAREA)$/.test((e.target && e.target.tagName) || ''); }
+  document.addEventListener('keydown', function (e) {
+    if (!fcKey(e)) return;
+    if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) fcFlip(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); fcNext(); }
+    else if (e.key === '1' && fc.open) fcRate(false);
+    else if (e.key === '2' && fc.open) fcRate(true);
+  });
+  document.addEventListener('keyup', function (e) { if (fcKey(e) && (e.code === 'Space' || e.key === ' ' || e.key === 'Enter')) e.preventDefault(); });
+
+  /* ---------- Vista: Notación ---------- */
+  var nt = { cube: null, mod: '', q: Promise.resolve() };
+  var MOVE_TXT = {
+    R: 'La cara derecha. Sentido normal: horario mirándola desde la derecha (la fila de adelante sube).', L: 'La cara izquierda. Sentido normal: horario mirándola desde la izquierda (la fila de adelante baja).',
+    U: 'La cara de arriba. Sentido normal: horario mirándola desde arriba.', D: 'La cara de abajo. Sentido normal: horario mirándola desde abajo.',
+    F: 'La cara del frente. Sentido normal: horario mirándola de frente.', B: 'La cara de atrás. Sentido normal: horario mirándola desde atrás.',
+    r: 'R ancho: la cara derecha junto con la capa del medio.', l: 'L ancho: la cara izquierda junto con la capa del medio.', u: 'U ancho: la cara de arriba junto con la capa del medio.',
+    d: 'D ancho: la cara de abajo junto con la capa del medio.', f: 'F ancho: la cara del frente junto con la capa del medio.', b: 'B ancho: la cara de atrás junto con la capa del medio.',
+    M: 'La capa del medio entre izquierda y derecha. Gira en el mismo sentido que L.', E: 'La capa del medio entre arriba y abajo. Gira en el mismo sentido que D.', S: 'La capa del medio entre frente y atrás. Gira en el mismo sentido que F.',
+    x: 'El cubo entero, en el sentido de R. No es un giro de capa: cambias cómo lo sostienes.', y: 'El cubo entero, en el sentido de U.', z: 'El cubo entero, en el sentido de F.'
+  };
+  var MOD_TXT = { '': 'Sin marca: un cuarto de vuelta en su sentido normal.', "'": 'Con apóstrofo: un cuarto de vuelta al revés.', '2': 'Con un 2: media vuelta.' };
+  function initNotacion() {
+    if (nt.cube) return;
+    nt.cube = new Cube3D($('#not-cubo'), { white: true });
+    function run(alg, label, txt) {
+      $('#not-lee').innerHTML = ''; $('#not-lee').appendChild(h('b', { text: label })); $('#not-lee').appendChild(document.createTextNode(txt));
+      Cube.parse(alg).forEach(function (m) { nt.q = nt.q.then(function () { return nt.cube.move(m, 380); }).catch(function () { }); });
+    }
+    $('#not-reset').addEventListener('click', function () { nt.q = Promise.resolve(); nt.cube.setState(Cube.solved()); $('#not-lee').textContent = 'Toca una letra para ver el giro en el cubo.'; });
+    var der = $('#not-der'), mods = h('div', { class: 'filtros', role: 'group', 'aria-label': 'Tipo de giro' });
+    function paintMods() {
+      mods.textContent = '';
+      [['', 'R  normal'], ["'", "R'  al revés"], ['2', 'R2  doble']].forEach(function (m) { mods.appendChild(h('button', { class: 'chip mono', 'aria-pressed': nt.mod === m[0] ? 'true' : 'false', text: m[1], onclick: function () { nt.mod = m[0]; paintMods(); } })); });
+    }
+    paintMods();
+    der.appendChild(h('div', { class: 'fam' }, [h('h2', { text: '¿Cuál es el frente?' }),
+      h('p', { text: 'El frente (F) es la cara que te mira cuando sostienes el cubo. No es un color fijo: depende de cómo lo tengas en la mano. Desde ahí se nombran las demás: U arriba, D abajo, R a tu derecha, L a tu izquierda y B atrás.' }),
+      h('p', { text: 'En los cubos 3D, la etiqueta FRENTE del suelo marca ese lado y no se mueve aunque cambien los colores. En los diagramas vistos desde arriba, el frente es el borde de abajo.' }),
+      h('div', { class: 'acc' }, [h('button', { class: 'btn sm', text: 'Probar: girar el cubo entero (y)', onclick: function () { run('y', 'y', ' El verde se fue a la izquierda y ahora el frente es otro color. La etiqueta sigue en su sitio: el frente es una posición, no una cara pintada.'); } })]),
+      h('p', { text: 'En esta página, los casos de OLL y PLL parten con amarillo arriba y verde al frente. Aquí en Notación, con blanco arriba y verde al frente.' })]));
+    der.appendChild(h('div', { class: 'fam' }, [h('h2', { text: 'Cómo se lee un algoritmo' }),
+      h('p', { text: 'Cada letra es una capa. Sola, gira un cuarto de vuelta en sentido horario mirando esa cara de frente. Con apóstrofo (R\') gira al revés, y con un 2 (R2) da media vuelta. Elige el tipo de giro y toca las letras.' }), mods]));
+    [['Caras', 'Las seis caras, en mayúscula. Con F2L ya usas casi todas.', 'RLUDFB'],
+     ['Giros anchos', 'En minúscula: la cara y la capa del medio se mueven juntas. Aparecen mucho en OLL (r, l, f).', 'rludfb'],
+     ['Capas del medio', 'M es la más usada: está en las PLL de aristas (Ua, Ub, H, Z).', 'MES'],
+     ['Cubo entero', 'x, y, z giran todo el cubo en la mano. No cuentan como movimiento.', 'xyz']].forEach(function (f) {
+      der.appendChild(h('div', { class: 'fam' }, [h('h3', { text: f[0] }), h('p', { text: f[1] }), h('div', { class: 'teclas' }, f[2].split('').map(function (b) {
+        return h('button', { class: 'tecla', text: b, 'aria-label': 'Giro ' + b, onclick: function () { run(b + nt.mod, b + nt.mod, MOVE_TXT[b] + ' ' + MOD_TXT[nt.mod]); } });
+      }))]));
+    });
+    der.appendChild(h('div', { class: 'fam' }, [h('h3', { text: 'Gatillos' }),
+      h('p', { text: 'Secuencias cortas que se repiten dentro de muchos algoritmos. Si las haces de un tirón, un OLL de 10 movimientos pasa a ser 3 gestos. En los casos aparecen subrayadas, con su nombre debajo. Puedes editar esta lista en Personalizar.' }),
+      h('div', { class: 'gat', id: 'not-gat' })]));
+    nt.run = run; renderGatNotacion();
+    der.appendChild(h('div', { class: 'fam' }, [h('h3', { text: 'Paréntesis y ajustes' }),
+      h('p', { text: 'Un (U) entre paréntesis es un ajuste de la capa de arriba: se hace para dejar el caso en el ángulo correcto antes del algoritmo, o para alinear la capa al terminar. En competencia se le dice AUF.' })]));
+  }
+
+  /* ---------- Estilos completos de la interfaz ---------- */
+  var ESTILOS = [
+    ['base', 'Pizarra', 'El diseño original: claro u oscuro, con acento cobalto.', ['#eceff4', '#1b4fd6', '#131926', '#f6d21c']],
+    ['crono', 'Cronómetro', 'Oscuro, pantallas tipo LCD y menú lateral.', ['#101215', '#aebba3', '#e5483f', '#e9ecef']],
+    ['pop', 'Juguete pop', 'Colores vivos, bordes gruesos y tarjetas grandes.', ['#eef6ff', '#ff7a00', '#17142b', '#1ea34a']],
+    ['mini', 'Minimal compacto', 'Denso y sobrio: los casos en lista.', ['#f7f7f5', '#0f766e', '#1c1c1a', '#e2e2dd']]
+  ];
+  function applyEstilo() { document.documentElement.setAttribute('data-estilo', store.prefs.estilo || 'base'); }
+
+  /* ---------- Mi cubo: marca propia en el centro blanco ---------- */
+  function svgUri(body) { return 'data:image/svg+xml,' + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>" + body + '</svg>'); }
+  var INK = '#1a1d24';
+  var EMB = [
+    ['Estrella', svgUri("<path fill='" + INK + "' d='M12 1c1 6 4 9 11 11-7 2-10 5-11 11-1-6-4-9-11-11 7-2 10-5 11-11z'/>")],
+    ['Rayo', svgUri("<path fill='" + INK + "' d='M14 1 4 14h6l-2 9 12-14h-7z'/>")],
+    ['Hexágono', svgUri("<path fill='none' stroke='" + INK + "' stroke-width='2.4' stroke-linejoin='round' d='M12 2 20.7 7v10L12 22 3.3 17V7z'/><circle cx='12' cy='12' r='3.3' fill='" + INK + "'/>")],
+    ['Espiral', svgUri("<path fill='none' stroke='" + INK + "' stroke-width='2.4' stroke-linecap='square' d='M12 12h3V9H9v6h9V6H6v12h14'/>")],
+    ['Rombo', svgUri("<path fill='" + INK + "' fill-rule='evenodd' d='M12 1.5 22.5 12 12 22.5 1.5 12zM12 7.5 7.5 12l4.5 4.5 4.5-4.5z'/>")]
+  ];
+  function applyMarca() {
+    var m = store.prefs.marca, st = document.documentElement.style, img = 'none', txt = '""';
+    if (m.k === 'img' && m.img) img = 'url("' + m.img + '")';
+    else if (/^e[0-4]$/.test(m.k)) img = 'url("' + EMB[+m.k.charAt(1)][1] + '")';
+    else if (m.k === 'txt' && m.txt) txt = JSON.stringify(m.txt);
+    st.setProperty('--marca-img', img); st.setProperty('--marca-txt', txt);
+    st.setProperty('--marca-fs', String([0.36, 0.36, 0.36, 0.27, 0.21][m.txt.length] || 0.36));
+  }
+  var aj = { dlg: $('#ajustes'), cube: null, host: null };
+  function setMarca(k) { store.prefs.marca.k = k; touch(); applyMarca(); renderAjustes(); }
+  function renderAjustes() {
+    var m = store.prefs.marca, box = $('#aj'); box.textContent = '';
+    function opt(k, label, inner) {
+      return h('button', { class: 'marca-b', 'aria-pressed': m.k === k ? 'true' : 'false', onclick: function () { setMarca(k); } }, [inner, h('span', { text: label })]);
+    }
+    var msg = h('p', { class: 'msg bad', role: 'status' });
+    box.appendChild(h('div', { class: 'det-h' }, [h('div', null, [h('h2', { id: 'aj-titulo', text: 'Personalizar' })]),
+      h('button', { class: 'btn sm x', 'aria-label': 'Cerrar', html: ICON.x, onclick: function () { aj.dlg.close(); } })]));
+    box.appendChild(h('div', { class: 'bloque' }, [h('p', { class: 'eyebrow', text: 'Estilo de la app' }),
+      h('div', { class: 'estilos' }, ESTILOS.map(function (e) {
+        return h('button', { class: 'estilo-b', 'aria-pressed': store.prefs.estilo === e[0] ? 'true' : 'false', onclick: function () { store.prefs.estilo = e[0]; touch(); applyEstilo(); renderAjustes(); } }, [
+          h('span', { class: 'estilo-mues', style: 'background:' + e[3][0] }, e[3].slice(1).map(function (col) { return h('i', { style: 'background:' + col }); })),
+          h('b', { text: e[1] }), h('span', { text: e[2] })
+        ]);
+      })),
+      store.prefs.estilo === 'crono' ? h('p', { class: 'nota', text: 'Este estilo es siempre oscuro, como la pantalla de un cronómetro.' }) : null
+    ]));
+    var conGuia = CASES.filter(function (c) { return c.guia && !guiaDe(c, c.a); });
+    var usando = conGuia.filter(function (c) { return guiaDe(c, algOf(c)); }).length;
+    box.appendChild(h('div', { class: 'bloque' }, [h('p', { class: 'eyebrow', text: 'Algoritmos de tus guías' }),
+      h('p', { class: 'nota', text: 'En ' + conGuia.length + ' casos tus guías (OLL, PLL y F2L reducidos) usan un algoritmo distinto al de la app. Ahora usas el de la guía en ' + usando + '. Los de la guía llevan la marca «Guía».' }),
+      h('div', { class: 'acc' }, [
+        h('button', { class: 'btn sm', text: 'Usar los de mis guías', onclick: function () { conGuia.forEach(function (c) { if (!guiaDe(c, algOf(c))) P(c.id).alg = (c.alt || []).filter(function (x) { return guiaDe(c, x); })[0] || ''; }); touch(); renderAjustes(); refreshAll(); toast('Ahora usas los algoritmos de tus guías'); } }),
+        h('button', { class: 'btn sm', text: 'Volver a los de la app', onclick: function () { conGuia.forEach(function (c) { if (guiaDe(c, algOf(c))) P(c.id).alg = ''; }); touch(); renderAjustes(); refreshAll(); toast('Volviste a los algoritmos de la app'); } })
+      ])]));
+    box.appendChild(trigEditor());
+    box.appendChild(h('p', { class: 'eyebrow', text: 'Tu cubo' }));
+    box.appendChild(h('div', { class: 'escena' }, [aj.host]));
+    var kids = [opt('none', 'Sin marca', h('i'))];
+    EMB.forEach(function (e, i) { kids.push(opt('e' + i, e[0], h('i', { style: 'background-image:url("' + e[1] + '")' }))); });
+    kids.push(opt('txt', 'Mis iniciales', h('i', { text: m.txt || 'Aa' })));
+    kids.push(opt('img', 'Mi imagen', h('i', { style: m.img ? 'background-image:url("' + m.img + '")' : null, text: m.img ? '' : '+' })));
+    box.appendChild(h('div', { class: 'bloque' }, [h('p', { class: 'eyebrow', text: 'Marca en el centro blanco' }), h('div', { class: 'marcas' }, kids)]));
+    if (m.k === 'txt') {
+      var inp = h('input', { type: 'text', id: 'marca-txt', maxlength: '4', value: m.txt, placeholder: 'Hasta 4 letras', 'aria-label': 'Iniciales', autocomplete: 'off' });
+      inp.addEventListener('input', function () { store.prefs.marca.txt = limpiaTxt(inp.value); touch(); applyMarca(); });
+      box.appendChild(h('div', { class: 'campo' }, [inp]));
+    }
+    if (m.k === 'img') {
+      var file = h('input', { type: 'file', id: 'marca-img', accept: 'image/*', 'aria-label': 'Imagen para el centro' });
+      file.addEventListener('change', function () {
+        var f = file.files && file.files[0]; if (!f) return;
+        if (!/^image\//.test(f.type)) { msg.textContent = 'Ese archivo no es una imagen. Prueba con un PNG o JPG.'; return; }
+        var rd = new FileReader();
+        rd.onload = function () {
+          var im = new Image();
+          im.onload = function () {
+            var cv = document.createElement('canvas'); cv.width = cv.height = 128;
+            var sc = Math.min(128 / im.width, 128 / im.height), w = im.width * sc, hh = im.height * sc;
+            cv.getContext('2d').drawImage(im, (128 - w) / 2, (128 - hh) / 2, w, hh);
+            var url = cv.toDataURL('image/png');
+            if (url.length >= 200000) { msg.textContent = 'La imagen tiene demasiado detalle para guardarla. Prueba con una más simple.'; return; }
+            store.prefs.marca.img = url; store.prefs.marca.k = 'img'; touch(); applyMarca(); renderAjustes();
+          };
+          im.onerror = function () { msg.textContent = 'No se pudo leer esa imagen. Prueba con un PNG o JPG.'; };
+          im.src = rd.result;
+        };
+        rd.readAsDataURL(f);
+      });
+      box.appendChild(h('div', { class: 'bloque' }, [file, h('p', { class: 'nota', text: 'Un dibujo tuyo, tu firma o el emblema de tu club. Se guarda reducida a 128 px; lo mejor es fondo blanco o transparente.' }), msg]));
+    }
+    box.appendChild(h('p', { class: 'nota', text: 'La marca aparece en el centro blanco de todos los cubos. En los casos de OLL y PLL el blanco queda abajo: arrastra el cubo para verla.' }));
+  }
+  function trigEditor() {
+    var wrap = h('div', { class: 'bloque' }), rows = h('div', { class: 'trig-lista' });
+    function save(list) { store.prefs.trigs = list; touch(); }
+    function current() { return (store.prefs.trigs || trigList()).map(function (t) { return { n: t.n, a: t.a }; }); }
+    function paint() {
+      rows.textContent = '';
+      current().forEach(function (t, i) {
+        var msg = h('p', { class: 'msg bad trig-msg' });
+        function check() { var ms = Cube.parse(inA.value); msg.textContent = !inN.value.trim() ? 'Ponle un nombre.' : ms.length < 2 ? 'Escribe al menos 2 movimientos.' : ms.length > 30 ? 'Máximo 30 movimientos.' : ''; }
+        var inN = h('input', { type: 'text', id: 'trig-n-' + i, value: t.n, maxlength: '30', placeholder: 'Nombre', 'aria-label': 'Nombre del movimiento ' + (i + 1), autocomplete: 'off' });
+        var inA = h('input', { type: 'text', id: 'trig-a-' + i, value: t.a, class: 'mono', placeholder: "R U R' U'", 'aria-label': 'Movimientos de ' + (t.n || 'la fila ' + (i + 1)), autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false' });
+        function upd() { var l = current(); l[i] = { n: inN.value, a: inA.value }; save(l); check(); }
+        inN.addEventListener('input', upd); inA.addEventListener('input', upd);
+        inN.addEventListener('change', refreshAlgViews); inA.addEventListener('change', refreshAlgViews);
+        rows.appendChild(h('div', { class: 'trig-fila' }, [inN, inA, h('button', { class: 'btn sm', 'aria-label': 'Quitar ' + (t.n || 'fila'), html: ICON.x, onclick: function () { var l = current(); l.splice(i, 1); save(l); paint(); refreshAlgViews(); } }), msg]));
+        check();
+      });
+    }
+    var on = h('input', { type: 'checkbox', id: 'trig-on' }); on.checked = store.prefs.trigOn !== false;
+    on.addEventListener('change', function () { store.prefs.trigOn = on.checked; touch(); refreshAlgViews(); });
+    wrap.appendChild(h('p', { class: 'eyebrow', text: 'Movimientos con nombre' }));
+    wrap.appendChild(h('p', { class: 'nota', text: 'Cuando un algoritmo contiene una de estas secuencias, la app la agrupa y le pone el nombre debajo, en todas las pantallas.' }));
+    wrap.appendChild(h('label', { class: 'check', for: 'trig-on' }, [on, ' Mostrar los nombres en los algoritmos']));
+    wrap.appendChild(rows);
+    wrap.appendChild(h('div', { class: 'acc' }, [
+      h('button', { class: 'btn sm', text: 'Agregar movimiento con nombre', onclick: function () { var l = current(); l.push({ n: '', a: '' }); save(l); paint(); var last = rows.querySelector('.trig-fila:last-child input'); if (last) last.focus(); } }),
+      h('button', { class: 'btn sm', text: 'Restablecer predeterminados', onclick: function () { store.prefs.trigs = null; store.prefs.trigOn = true; on.checked = true; touch(); paint(); refreshAlgViews(); toast('Lista de movimientos con nombre restablecida'); } })
+    ]));
+    paint();
+    return wrap;
+  }
+  function openAjustes() {
+    if (!aj.cube) { aj.host = h('div'); aj.cube = new Cube3D(aj.host, { white: true }); aj.cube.rx = -38; aj.cube.view(); }
+    renderAjustes();
+    if (!aj.dlg.open) { if (aj.dlg.showModal) aj.dlg.showModal(); else aj.dlg.setAttribute('open', ''); }
+    aj.cube.layout();
+  }
+  aj.dlg.addEventListener('click', function (e) { if (e.target === aj.dlg) aj.dlg.close(); });
+  $('#btn-cubo').addEventListener('click', openAjustes);
+
+  /* ---------- Tema claro u oscuro ---------- */
+  var temaBase = document.documentElement.getAttribute('data-theme');   /* lo que haya fijado el visor */
+  function temaActual() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t === 'dark' || t === 'light') return t;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function applyTema() {
+    var t = store.prefs.tema, r = document.documentElement;
+    if (t === 'dark' || t === 'light') r.setAttribute('data-theme', t);
+    else if (temaBase) r.setAttribute('data-theme', temaBase); else r.removeAttribute('data-theme');
+    var osc = temaActual() === 'dark';
+    $('#btn-tema').innerHTML = (osc ? ICON.sol : ICON.luna) + '<span>' + (osc ? 'Modo claro' : 'Modo oscuro') + '</span>';
+  }
+  $('#btn-tema').addEventListener('click', function () { store.prefs.tema = temaActual() === 'dark' ? 'light' : 'dark'; touch(); applyTema(); });
+
+  function renderGatNotacion() {
+    var box = document.getElementById('not-gat'); if (!box || !nt.run) return; box.textContent = '';
+    var list = trigList().filter(trigValid);
+    if (!list.length) { box.appendChild(h('p', { class: 'nota', text: 'No hay movimientos con nombre. Agrégalos en Personalizar.' })); return; }
+    list.forEach(function (t) {
+      var def = TRIG_DEF.filter(function (d) { return d.n === t.n && Cube.str(Cube.parse(d.a)) === Cube.str(Cube.parse(t.a)); })[0];
+      var alg = Cube.str(Cube.parse(t.a));
+      box.appendChild(h('button', { onclick: function () { nt.q = Promise.resolve(); nt.cube.setState(Cube.solved()); nt.run(alg, t.n, ' ' + alg + (def ? '. ' + def.d : '.')); } }, [h('b', { text: alg }), h('span', { text: t.n + (def ? '. ' + def.d : '') })]));
+    });
+  }
+  /* Volver a dibujar todo lo que muestra algoritmos cuando cambia la lista de nombres */
+  function refreshAlgViews() { rebuildTrig(); if (ui.view === 'casos') renderCasos(); if (dlg.open && det.c) renderDetalle(); renderGatNotacion(); if (ui.view === 'tarjetas' && fc.cur && fc.open) { fc.open = false; fcNext(); } }
+
+  /* ---------- Navegación e inicio ---------- */
+  function setView(v) {
+    if (['casos', 'practicar', 'tarjetas', 'notacion'].indexOf(v) < 0) v = 'casos';
+    ui.view = v;
+    ['casos', 'practicar', 'tarjetas', 'notacion'].forEach(function (n) { $('#v-' + n).hidden = n !== v; $('#tab-' + n).setAttribute('aria-selected', n === v ? 'true' : 'false'); });
+    if (v !== 'practicar') { stopTimer(); if (pr.pl) pr.pl.halt(); }
+    if (v === 'casos') renderCasos();
+    if (v === 'practicar') { setOptions(); $('#pr-auf').checked = store.prefs.auf; if (!pr.cur || pr.phase === 'idle') nextCase(); else pr.cube.layout(); renderSesion(); }
+    if (v === 'tarjetas') { fcOptions(); if (!fc.cur) fcNext(); }
+    if (v === 'notacion') { initNotacion(); nt.cube.layout(); }
+    try { history.replaceState(null, '', '#' + v); } catch (e) { }
+  }
+  function refreshAll() { dgCache = {}; rebuildTrig(); applyEstilo(); applyMarca(); applyTema(); if (aj.dlg.open) renderAjustes(); if (ui.view === 'casos') renderCasos(); if (ui.view === 'practicar') { setOptions(); $('#pr-auf').checked = store.prefs.auf; } if (ui.view === 'tarjetas') fcOptions(); if (dlg.open && det.c) renderDetalle(); }
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.addEventListener('click', function () { setView(t.dataset.v); }); });
+  loadLocal(); rebuildTrig(); applyEstilo(); applyMarca(); applyTema();
+  var first = 0, n;
+  for (n = 1; n <= STAGES.length && !first; n++) if (stageCases(n).some(function (c) { return peek(c.id).s === 1; })) first = n;
+  for (n = 1; n <= STAGES.length && !first; n++) if (stageCases(n).some(function (c) { return peek(c.id).s !== 2; })) first = n;
+  ui.stage = first || 1;
+  setView((location.hash || '').replace('#', '') || 'casos');
+  initRemote();
+})();
+</script>

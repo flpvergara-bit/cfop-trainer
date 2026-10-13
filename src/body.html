@@ -1,0 +1,68 @@
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <h1>Entrenador OLL y PLL</h1>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Secciones">
+      <button class="tab" role="tab" id="tab-casos" data-v="casos" aria-selected="true">Casos</button>
+      <button class="tab" role="tab" id="tab-practicar" data-v="practicar" aria-selected="false">Practicar</button>
+      <button class="tab" role="tab" id="tab-tarjetas" data-v="tarjetas" aria-selected="false">Tarjetas</button>
+      <button class="tab" role="tab" id="tab-notacion" data-v="notacion" aria-selected="false">Notación</button>
+    </div>
+    <button class="btn sm" id="btn-cubo">Personalizar</button>
+    <button class="btn sm" id="btn-tema"></button>
+    <p class="sync" id="sync" data-s="local">Progreso guardado en este navegador</p>
+  </header>
+
+  <section id="v-casos" class="vista" role="tabpanel" aria-labelledby="tab-casos">
+    <div class="ruta" id="ruta"></div>
+    <div class="como" id="como"></div>
+    <div class="filtros" id="filtros"></div>
+    <div id="lista" class="vista"></div>
+  </section>
+
+  <section id="v-practicar" class="vista" hidden role="tabpanel" aria-labelledby="tab-practicar">
+    <div class="vista">
+      <div class="pr-top">
+        <label for="pr-set">Qué practicar
+          <select id="pr-set"></select>
+        </label>
+        <label class="check" for="pr-auf"><input type="checkbox" id="pr-auf"> Mostrar el caso desde un ángulo al azar</label>
+      </div>
+      <ol class="pasos">
+        <li>Arma el caso en tu cubo con la mezcla.</li>
+        <li>Pulsa <kbd>Espacio</kbd> y haz el algoritmo de memoria.</li>
+        <li>Detén el cronómetro y evalúate.</li>
+      </ol>
+      <div id="pr-cuerpo"></div>
+      <div class="sesion" id="sesion"></div>
+    </div>
+  </section>
+
+  <section id="v-tarjetas" class="vista" hidden role="tabpanel" aria-labelledby="tab-tarjetas">
+    <div class="pr-top">
+      <label for="fc-set">Qué tarjetas
+        <select id="fc-set"></select>
+      </label>
+      <label class="check" for="fc-girar"><input type="checkbox" id="fc-girar"> Girar los casos de OLL y PLL al azar</label>
+    </div>
+    <p class="nota">Mira el caso y trata de recordar el algoritmo. Toca la tarjeta (o pulsa <kbd>Espacio</kbd>) para darla vuelta y comprobarlo.</p>
+    <div class="fc" id="fc-cuerpo"></div>
+    <p class="nota fc-ses" id="fc-sesion" role="status"></p>
+  </section>
+
+  <section id="v-notacion" hidden role="tabpanel" aria-labelledby="tab-notacion">
+    <div class="not">
+      <div class="not-izq">
+        <div class="escena"><div id="not-cubo"></div></div>
+        <p class="lectura" id="not-lee">Toca una letra para ver el giro en el cubo.</p>
+        <div class="bajo-cubo"><span>Blanco arriba, verde al frente</span><button class="btn sm" id="not-reset">Dejarlo resuelto</button></div>
+      </div>
+      <div class="not-der" id="not-der"></div>
+    </div>
+  </section>
+</div>
+<dialog id="ajustes" aria-labelledby="aj-titulo"><div class="aj" id="aj"></div></dialog>
+<dialog id="detalle" aria-labelledby="det-nombre"><div class="det" id="det"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
