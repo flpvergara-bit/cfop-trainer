@@ -109,7 +109,33 @@
     if (c) { c.guia = c.guia || {}; c.guia[normA(ok)] = 'F2L reducido'; c.guiaNota = "En la guía impresa aparece como U' R' U2 R U F' U' F, pero así desarma otras piezas. Esta es la versión que funciona: cambia R' U2 R por R U2 R'."; }
   })();
   function guiaDe(c, alg) { return c.guia && c.guia[normA(alg)] || ''; }
-  function guiaTag(c, alg) { var g = guiaDe(c, alg); return g ? h('span', { class: 'guia', title: 'Algoritmo de tu guía ' + g, text: 'Guía' }) : null; }
+  function guiaTip(c, alg) {
+    var g = guiaDe(c, alg); if (!g) return '';
+    var t = 'Algoritmo de tu guía impresa «' + g + '», de myrubik.com.';
+    if (c.guiaNota) t += ' La guía trae una errata en este caso; aquí está corregida.';
+    return t + ' Comprobado en el simulador de la app.';
+  }
+  function guiaTag(c, alg) { var t = guiaTip(c, alg); return t ? h('span', { class: 'guia', 'data-tip': t, 'aria-label': 'Guía. ' + t, text: 'Guía' }) : null; }
+  /* Texto flotante para cualquier elemento con data-tip (pasar el mouse o tocarlo) */
+  var tipEl = null, tipFor = null, tipAt = 0;
+  function hideTip() { if (tipEl) tipEl.remove(); tipEl = null; tipFor = null; }
+  function showTip(el) {
+    hideTip();
+    var host = (el.closest && el.closest('dialog[open]')) || document.body;
+    tipEl = h('div', { class: 'tip', role: 'tooltip', text: el.dataset.tip }); host.appendChild(tipEl); tipFor = el; tipAt = Date.now();
+    var r = el.getBoundingClientRect(), t = tipEl.getBoundingClientRect();
+    var x = Math.min(Math.max(8, r.left + r.width / 2 - t.width / 2), window.innerWidth - t.width - 8), y = r.top - t.height - 8;
+    if (y < 8) y = r.bottom + 8;
+    tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px';
+  }
+  document.addEventListener('mouseover', function (e) { var el = e.target.closest && e.target.closest('[data-tip]'); if (el && el !== tipFor) showTip(el); else if (!el && tipFor && !e.target.closest('.tip')) hideTip(); });
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest && e.target.closest('[data-tip]');
+    if (el && !el.closest('button')) { e.stopPropagation(); e.preventDefault(); if (tipFor === el) { if (Date.now() - tipAt > 500) hideTip(); } else showTip(el); }
+    else if (el) hideTip();   /* dentro de un botón: el toque hace lo del botón; el texto se ve al pasar el mouse */
+    else if (tipFor) hideTip();
+  }, true);
+  window.addEventListener('scroll', hideTip, true);
 
   /* ---------- Progreso (navegador + cuenta) ---------- */
   var LS_KEY = 'ollpll.progreso.v1';
@@ -117,7 +143,7 @@
   function limpiaTxt(t) { return String(t || '').replace(/["\\<>\u0000-\u001f]/g, '').trim().slice(0, 4); }
   function normalize(o) {
     var out = { v: 1, cases: {}, prefs: { speed: 420, auf: false, set: '', tema: 'auto', marca: { k: 'none', txt: '', img: '' } }, updatedAt: +o.updatedAt || 0 };
-    if (o.prefs) { out.prefs.speed = [0, 240, 420, 620, 900].indexOf(+o.prefs.speed) >= 0 ? +o.prefs.speed : 420; out.prefs.auf = !!o.prefs.auf; out.prefs.set = String(o.prefs.set || ''); out.prefs.tema = o.prefs.tema === 'dark' || o.prefs.tema === 'light' ? o.prefs.tema : 'auto'; out.prefs.fcset = String(o.prefs.fcset || ''); out.prefs.estilo = ['base', 'crono', 'pop', 'mini'].indexOf(o.prefs.estilo) >= 0 ? o.prefs.estilo : 'base'; out.prefs.fcrot = !!o.prefs.fcrot; out.prefs.trigOn = o.prefs.trigOn !== false;
+    if (o.prefs) { out.prefs.speed = [0, 240, 420, 620, 900].indexOf(+o.prefs.speed) >= 0 ? +o.prefs.speed : 420; out.prefs.auf = !!o.prefs.auf; out.prefs.set = String(o.prefs.set || ''); out.prefs.tema = o.prefs.tema === 'dark' || o.prefs.tema === 'light' ? o.prefs.tema : 'auto'; out.prefs.fcset = String(o.prefs.fcset || ''); out.prefs.estilo = ['base', 'crono', 'pop', 'mini'].indexOf(o.prefs.estilo) >= 0 ? o.prefs.estilo : 'base'; out.prefs.fcrot = !!o.prefs.fcrot; out.prefs.trigOn = o.prefs.trigOn !== false; out.prefs.cubo = o.prefs.cubo === 'clasico' ? 'clasico' : 'mate';
       out.prefs.trigs = Array.isArray(o.prefs.trigs) ? o.prefs.trigs.slice(0, 40).map(function (t) { return { n: String((t && t.n) || '').slice(0, 30), a: String((t && t.a) || '').slice(0, 120) }; }) : null;
       var mk = o.prefs.marca || {}, img = typeof mk.img === 'string' && mk.img.indexOf('data:image/') === 0 && mk.img.length < 200000 ? mk.img : '';
       out.prefs.marca = { k: /^(none|e[0-4]|txt|img)$/.test(mk.k) ? mk.k : 'none', txt: limpiaTxt(mk.txt), img: img }; }
@@ -991,7 +1017,11 @@
     ['pop', 'Juguete pop', 'Colores vivos, bordes gruesos y tarjetas grandes.', ['#eef6ff', '#ff7a00', '#17142b', '#1ea34a']],
     ['mini', 'Minimal compacto', 'Denso y sobrio: los casos en lista.', ['#f7f7f5', '#0f766e', '#1c1c1a', '#e2e2dd']]
   ];
-  function applyEstilo() { document.documentElement.setAttribute('data-estilo', store.prefs.estilo || 'base'); }
+  function applyEstilo() { document.documentElement.setAttribute('data-estilo', store.prefs.estilo || 'base'); document.documentElement.setAttribute('data-cubo', store.prefs.cubo || 'mate'); }
+  var CUBOS = [
+    ['mate', 'Mate sin pegatinas', 'Piezas de color, acabado mate y colores vivos.', ['#f2f3ee', '#ffd31a', '#e8262c', '#ff7a14', '#1863dc', '#13b05a']],
+    ['clasico', 'Clásico con pegatinas', 'Cuerpo negro con pegatinas brillantes.', ['#14161b', '#f6d21c', '#d62c2c', '#f1851a', '#1d5fd8', '#1ea34a']]
+  ];
 
   /* ---------- Mi cubo: marca propia en el centro blanco ---------- */
   function svgUri(body) { return 'data:image/svg+xml,' + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>" + body + '</svg>'); }
@@ -1040,6 +1070,12 @@
       ])]));
     box.appendChild(trigEditor());
     box.appendChild(h('p', { class: 'eyebrow', text: 'Tu cubo' }));
+    box.appendChild(h('div', { class: 'estilos' }, CUBOS.map(function (e) {
+      return h('button', { class: 'estilo-b', 'aria-pressed': (store.prefs.cubo || 'mate') === e[0] ? 'true' : 'false', onclick: function () { store.prefs.cubo = e[0]; touch(); applyEstilo(); renderAjustes(); dgCache = {}; if (ui.view === 'casos') renderCasos(); } }, [
+        h('span', { class: 'estilo-mues', style: 'background:' + (e[0] === 'mate' ? '#2a2c31' : e[3][0]) }, e[3].slice(e[0] === 'mate' ? 0 : 1).map(function (col) { return h('i', { style: 'background:' + col }); })),
+        h('b', { text: e[1] }), h('span', { text: e[2] })
+      ]);
+    })));
     box.appendChild(h('div', { class: 'escena' }, [aj.host]));
     var kids = [opt('none', 'Sin marca', h('i'))];
     EMB.forEach(function (e, i) { kids.push(opt('e' + i, e[0], h('i', { style: 'background-image:url("' + e[1] + '")' }))); });

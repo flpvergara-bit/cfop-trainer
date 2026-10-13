@@ -505,4 +505,33 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
   :root[data-estilo] .det-play { height: auto; min-height: 0; }
   :root[data-estilo] .det-play .escena { flex: none; min-height: 190px; }
 }
+
+/* Menús desplegables: flecha propia con aire a la derecha */
+select { -webkit-appearance: none; -moz-appearance: none; appearance: none; padding-right: 38px !important; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-2) 50%), linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
+  background-position: calc(100% - 19px) 52%, calc(100% - 14px) 52%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+select::-ms-expand { display: none; }
+
+/* Texto flotante */
+.tip { position: fixed; z-index: 1000; max-width: 270px; padding: 8px 11px; border-radius: 8px; background: var(--ink); color: var(--bg); font: 500 12.5px/1.45 var(--f-body); box-shadow: 0 8px 24px rgba(0,0,0,.25); pointer-events: none; }
+.guia { cursor: help; }
+
+/* Cubo mate sin pegatinas: piezas de color, juntas finas, acabado mate con luz fija desde arriba-frente */
+:root[data-cubo="mate"] { --cu-U: #ffd31a; --cu-D: #f2f3ee; --cu-F: #13b05a; --cu-R: #ff7a14; --cu-B: #1863dc; --cu-L: #e8262c; }
+:root[data-cubo="mate"] .cf { background: #1d1e22; }
+:root[data-cubo="mate"] .cf::after { inset: 2.2%; border-radius: 11%; }
+:root[data-cubo="mate"] .cf[data-c]::after {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E"),
+    radial-gradient(120% 120% at 28% 22%, rgba(255,255,255,.16), rgba(255,255,255,0) 55%),
+    linear-gradient(160deg, rgba(255,255,255,.04), rgba(0,0,0,.12));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.07), inset 0 -2px 4px rgba(0,0,0,.18), inset 0 2px 3px rgba(255,255,255,.08); }
+:root[data-cubo="mate"] .cf-U::after { filter: brightness(1.07) saturate(.96); }
+:root[data-cubo="mate"] .cf-F::after { filter: brightness(.98); }
+:root[data-cubo="mate"] .cf-R::after { filter: brightness(.86); }
+:root[data-cubo="mate"] .cf-L::after { filter: brightness(.9); }
+:root[data-cubo="mate"] .cf-B::after { filter: brightness(.84); }
+:root[data-cubo="mate"] .cf-D::after { filter: brightness(.78); }
+:root[data-cubo="mate"] .cf[data-c="X"]::after { background-image: none; box-shadow: inset 0 -2px 4px rgba(0,0,0,.15); }
+:root[data-cubo="mate"] .dg .bg { fill: #2a2c31; }
 </style>
