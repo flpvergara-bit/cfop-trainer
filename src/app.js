@@ -615,14 +615,27 @@
   /* ---------- Vista: Casos ---------- */
   var ui = { stage: 1, status: -1, view: 'casos' };
   function stageCases(n) { return CASES.filter(function (c) { return c.e === n; }); }
+  /* Las etapas, en dos bloques: el camino de principiante (2 pasos) y el método completo */
+  var RUTA = [
+    { k: 'b', ns: [1, 2, 3], t: ['Principiante · en 2 pasos', 'Beginner · 2-look'], d: ['Pocos algoritmos: OLL y PLL se resuelven en dos partes cada una.', 'Few algorithms: OLL and PLL are each solved in two parts.'] },
+    { k: 'f', ns: [4, 5, 6], t: ['Avanzado · completo', 'Advanced · full'], d: ['Un algoritmo por caso: más rápido, pero hay más que aprender.', 'One algorithm per case: faster, but more to learn.'] }
+  ];
   function renderRuta() {
     var box = $('#ruta'); box.textContent = '';
-    STAGES.forEach(function (s) {
-      var cs = stageCases(s.n), ok = cs.filter(function (c) { return peek(c.id).s === 2; }).length, lr = cs.filter(function (c) { return peek(c.id).s === 1; }).length;
-      box.appendChild(h('button', { class: 'etapa', 'aria-pressed': ui.stage === s.n ? 'true' : 'false', onclick: function () { ui.stage = ui.stage === s.n ? 0 : s.n; renderCasos(); } }, [
-        h('span', { class: 'eyebrow', text: L('Etapa ', 'Stage ') + s.n + ' · ' + tx(s.sub) }), h('b', { text: tx(s.t) }),
-        h('span', { class: 'meter', 'aria-hidden': 'true' }, [h('span', { class: 'm-ok', style: 'width:' + (100 * ok / cs.length) + '%' }), h('span', { class: 'm-warn', style: 'width:' + (100 * lr / cs.length) + '%' })]),
-        h('span', { class: 'cnt', text: L(ok + ' de ' + cs.length + ' dominados', ok + ' of ' + cs.length + ' mastered') + (lr ? ' · ' + L(lr + ' en curso', lr + ' in progress') : '') })
+    RUTA.forEach(function (sec) {
+      var cards = [], tOk = 0, tAll = 0;
+      sec.ns.forEach(function (n) {
+        var s = STAGES[n - 1], cs = stageCases(n), ok = cs.filter(function (c) { return peek(c.id).s === 2; }).length, lr = cs.filter(function (c) { return peek(c.id).s === 1; }).length;
+        tOk += ok; tAll += cs.length;
+        cards.push(h('button', { class: 'etapa', 'data-n': n, 'aria-pressed': ui.stage === n ? 'true' : 'false', onclick: function () { ui.stage = ui.stage === n ? 0 : n; renderCasos(); } }, [
+          h('span', { class: 'eyebrow' }, [L('Etapa ', 'Stage ') + n, h('span', { class: 'sub', text: ' · ' + tx(s.sub) })]), h('b', { text: tx(s.t) }),
+          h('span', { class: 'meter', 'aria-hidden': 'true' }, [h('span', { class: 'm-ok', style: 'width:' + (100 * ok / cs.length) + '%' }), h('span', { class: 'm-warn', style: 'width:' + (100 * lr / cs.length) + '%' })]),
+          h('span', { class: 'cnt', text: L(ok + ' de ' + cs.length + ' dominados', ok + ' of ' + cs.length + ' mastered') + (lr ? ' · ' + L(lr + ' en curso', lr + ' in progress') : '') })
+        ]));
+      });
+      box.appendChild(h('section', { class: 'ruta-sec', 'data-k': sec.k, 'aria-label': tx(sec.t) }, [
+        h('div', { class: 'ruta-h' }, [h('span', { class: 'ruta-tag', text: tx(sec.t) }), h('span', { class: 'ruta-d', text: tx(sec.d) }), h('span', { class: 'ruta-cnt', text: L(tOk + ' de ' + tAll + ' dominados', tOk + ' of ' + tAll + ' mastered') })]),
+        h('div', { class: 'ruta-g' }, cards)
       ]));
     });
   }

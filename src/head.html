@@ -63,7 +63,17 @@ h3 { font-family: var(--f-display); font-weight: 600; font-size: 16px; }
 .sync[data-s="saving"]::before { background: var(--warn); }
 
 /* Ruta de etapas */
-.ruta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ruta { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.ruta-sec { display: grid; grid-template-rows: auto 1fr; gap: 10px; padding: 12px; border-radius: calc(var(--r) + 4px); border: 1px solid var(--line); background: var(--surface-2); }
+.ruta-sec[data-k="b"] { border-top: 3px solid var(--ok); }
+.ruta-sec[data-k="f"] { border-top: 3px solid var(--accent); }
+.ruta-h { display: flex; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; padding-inline: 2px; }
+.ruta-tag { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.ruta-sec[data-k="b"] .ruta-tag { background: var(--ok-soft); color: var(--ok); }
+.ruta-sec[data-k="f"] .ruta-tag { background: var(--accent-soft); color: var(--accent); }
+.ruta-d { font-size: 12.5px; color: var(--ink-2); }
+.ruta-cnt { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ruta-g { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .etapa { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .etapa[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
 .etapa b { font-family: var(--f-display); font-weight: 800; font-size: 16.5px; line-height: 1.15; }
@@ -298,7 +308,6 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
 #toast.ver { opacity: 1; }
 
 @media (max-width: 860px) {
-  .ruta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pr, .not { grid-template-columns: minmax(0, 1fr); }
   .not-izq { position: static; }
   .pr .c3d, .not .c3d { width: min(100%, 210px); }
@@ -308,7 +317,8 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
   .app { padding-inline: 16px; gap: 18px; }
   .brand h1 { font-size: 19px; }
   .tabs { width: 100%; } .tab { flex: 1; padding-inline: 8px; }
-  .etapa { padding: 10px 12px; } .etapa b { font-size: 15px; }
+  .etapa { padding: 9px 10px; gap: 5px; } .etapa b { font-size: 14px; } .etapa .sub { display: none; } .etapa .cnt { font-size: 11.5px; }
+  .ruta-sec { padding: 10px; } .ruta-g { gap: 8px; } .ruta-d { order: 3; width: 100%; } .ruta-cnt { font-size: 12px; }
   .casos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .caso { grid-template-columns: 52px minmax(0, 1fr); padding: 10px; } .caso svg { width: 52px; height: 52px; }
   .pr { padding: 14px; } .mezcla { font-size: 18px; } .algo { font-size: 17px; }
@@ -378,7 +388,8 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
   :root[data-estilo="crono"] .tab { text-align: left; padding: 11px 12px; }
   :root[data-estilo="crono"] .top .btn { justify-content: flex-start; }
   :root[data-estilo="crono"] .app > section { grid-column: 2; }
-  :root[data-estilo="crono"] .ruta { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  :root[data-estilo="crono"] .ruta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root[data-estilo="crono"] .ruta-d, :root[data-estilo="crono"] .etapa .sub { display: none; }
 }
 
 /* ===== Estilo: Juguete pop (bordes gruesos, sombras duras, tarjetas grandes) ===== */
@@ -407,10 +418,11 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
 :root[data-estilo="pop"] .tab { flex: 1; border: 2px solid var(--line); background: var(--surface); box-shadow: var(--pop-shadow); border-radius: 14px; font-family: var(--f-display); font-size: 17px; padding: 10px 8px; color: var(--ink); }
 :root[data-estilo="pop"] .tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 :root[data-estilo="pop"] .etapa { border-top-width: 10px; }
+:root[data-estilo="pop"] .ruta-sec { border-width: 2px; border-top-width: 5px; }
 :root[data-estilo="pop"] .meter { background: var(--cell-off); height: 8px; border-radius: 4px; }
-:root[data-estilo="pop"] .etapa:nth-child(1), :root[data-estilo="pop"] .etapa:nth-child(4) { border-top-color: var(--cu-F); }
-:root[data-estilo="pop"] .etapa:nth-child(2), :root[data-estilo="pop"] .etapa:nth-child(6) { border-top-color: var(--cu-U); }
-:root[data-estilo="pop"] .etapa:nth-child(3), :root[data-estilo="pop"] .etapa:nth-child(5) { border-top-color: var(--cu-L); }
+:root[data-estilo="pop"] .etapa[data-n="1"], :root[data-estilo="pop"] .etapa[data-n="4"] { border-top-color: var(--cu-F); }
+:root[data-estilo="pop"] .etapa[data-n="2"], :root[data-estilo="pop"] .etapa[data-n="6"] { border-top-color: var(--cu-U); }
+:root[data-estilo="pop"] .etapa[data-n="3"], :root[data-estilo="pop"] .etapa[data-n="5"] { border-top-color: var(--cu-L); }
 :root[data-estilo="pop"] .etapa[aria-pressed="true"] { background: var(--accent-soft); box-shadow: 6px 6px 0 var(--line); }
 :root[data-estilo="pop"] .casos { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
 :root[data-estilo="pop"] .caso { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 16px 12px; }
@@ -445,7 +457,10 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
 :root[data-estilo="mini"] .tab { border-radius: 0; padding: 7px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
 :root[data-estilo="mini"] .tab[aria-selected="true"] { background: none; color: var(--ink); border-bottom-color: var(--accent); }
 :root[data-estilo="mini"] .btn { min-height: 32px; padding: 5px 11px; border-radius: 4px; font-weight: 500; }
-:root[data-estilo="mini"] .ruta { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+:root[data-estilo="mini"] .ruta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+:root[data-estilo="mini"] .ruta-sec { padding: 8px; gap: 6px; border-radius: 6px; }
+:root[data-estilo="mini"] .ruta-g { gap: 6px; }
+:root[data-estilo="mini"] .ruta-d { display: none; }
 :root[data-estilo="mini"] .etapa { padding: 8px 10px; gap: 4px; border-radius: 4px; }
 :root[data-estilo="mini"] .etapa b { font-size: 13.5px; font-weight: 600; }
 :root[data-estilo="mini"] .etapa .eyebrow { font-size: 10.5px; }
@@ -468,9 +483,8 @@ dialog#ajustes::backdrop { background: rgba(8, 10, 16, .5); }
 :root[data-estilo="mini"] .escena { border-radius: 4px; }
 :root[data-estilo="mini"] dialog#detalle, :root[data-estilo="mini"] dialog#ajustes { border-radius: 6px; }
 :root[data-estilo="mini"] .algo { font-size: 17px; }
-@media (max-width: 860px) { :root[data-estilo="mini"] .ruta { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 860px) { :root[data-estilo="mini"] .ruta { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 520px) {
-  :root[data-estilo="mini"] .ruta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   :root[data-estilo="mini"] .caso { grid-template-columns: 30px minmax(0, 1fr) 12px; row-gap: 2px; }
   :root[data-estilo="mini"] .caso svg { width: 30px; height: 30px; grid-row: span 2; }
   :root[data-estilo="mini"] .caso .alg { grid-column: 2 / -1; }
