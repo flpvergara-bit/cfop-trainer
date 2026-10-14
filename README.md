@@ -10,7 +10,7 @@ La app está en inglés (idioma por defecto) y en español. Se cambia con el bot
 
 ## Página web pública (gratis)
 
-La app se publica con GitHub Pages en: **https://flpvergara-bit.github.io/entrenador-cubo/**
+La app se publica con GitHub Pages en: **https://flpvergara-bit.github.io/cfop-trainer/**
 
 - Usa el archivo `docs/index.html`, que `build.js` genera junto con `dist/cfop-trainer.html` (es el mismo contenido como página web completa).
 - Para activarla por primera vez: en GitHub, pestaña **Settings** → **Pages** → en "Branch" elige `main` y la carpeta `/docs` → **Save**.
@@ -48,7 +48,7 @@ Solo hace falta si cambias algún archivo de `src/`. Necesitas **Node.js** (grat
 1. Abre una terminal:
    - **Windows:** menú Inicio, escribe `cmd` y pulsa Enter.
    - **Mac:** abre Spotlight (Cmd + Espacio), escribe `Terminal` y pulsa Enter.
-2. Entra a la carpeta del proyecto. Escribe `cd ` (con un espacio), arrastra la carpeta `entrenador-cubo` a la ventana y pulsa Enter.
+2. Entra a la carpeta del proyecto. Escribe `cd ` (con un espacio), arrastra la carpeta del proyecto (`cfop-trainer`) a la ventana y pulsa Enter.
 3. Escribe estos comandos, uno por uno, pulsando Enter después de cada uno:
    - `node src/verify.js` — revisa OLL y PLL. Al final debe decir `errores 0`.
    - `node src/verificar-guias.js` — revisa los algoritmos de las guías.
