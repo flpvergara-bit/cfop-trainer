@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://flpvergara-bit.github.io/cfop-trainer/sitemap.xml
