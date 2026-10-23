@@ -26,7 +26,7 @@ La app se publica con GitHub Pages en: **https://flpvergara-bit.github.io/cfop-t
 | `src/engine.js` | Simulador del cubo: aplica movimientos y comprueba que un algoritmo resuelve su caso. |
 | `src/data.js` | Casos de OLL y PLL con sus algoritmos. |
 | `src/f2l-data.js` | Casos de F2L (generado por `f2lgen.js`). |
-| `src/guias.js` | Algoritmos de las guías impresas "OLL / PLL / F2L reducido" de myrubik.com. |
+| `src/guias.js` | Algoritmos de las guías impresas "OLL / PLL / F2L, reducido y completo" de myrubik.com (con sus erratas corregidas). |
 | `src/app.js`, `src/head.html`, `src/body.html` | La interfaz: pantallas, estilos y comportamiento. |
 | `src/build.js` | Une todas las piezas en el HTML final de `dist/`. |
 | `src/verify.js` | Verifica los 57 OLL y 21 PLL: que cada uno resuelve su caso y que no falta ninguno. |

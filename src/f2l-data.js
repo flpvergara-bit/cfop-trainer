@@ -80,7 +80,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Directo 1",
   "g": "fd",
-  "e": 4,
+  "e": 1,
   "a": "F' U' F",
   "alt": [
    "U F' U F U F' U F"
@@ -91,7 +91,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Directo 2",
   "g": "fd",
-  "e": 4,
+  "e": 1,
   "a": "R U R'"
  },
  {
@@ -99,7 +99,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Directo 3",
   "g": "fd",
-  "e": 4,
+  "e": 1,
   "a": "U R U' R'"
  },
  {
@@ -107,7 +107,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Directo 4",
   "g": "fd",
-  "e": 4,
+  "e": 1,
   "a": "U' F' U F"
  },
  {
@@ -115,7 +115,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Blanco arriba 1",
   "g": "fa",
-  "e": 4,
+  "e": 1,
   "a": "R U2 R' U' R U R'"
  },
  {
@@ -123,7 +123,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Blanco arriba 2",
   "g": "fa",
-  "e": 4,
+  "e": 1,
   "a": "F' U2 F U F' U' F"
  },
  {
@@ -131,7 +131,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Blanco arriba 3",
   "g": "fa",
-  "e": 4,
+  "e": 1,
   "a": "U R U2 R' U R U' R'",
   "alt": [
    "R U2 R' U R U' R'"
@@ -142,7 +142,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Blanco arriba 4",
   "g": "fa",
-  "e": 4,
+  "e": 1,
   "a": "U' F' U2 F U' F' U F"
  },
  {
@@ -150,7 +150,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Blanco arriba 5",
   "g": "fa",
-  "e": 4,
+  "e": 1,
   "a": "U2 R U R' U R U' R'",
   "alt": [
    "R U' R' U2 R U R'",
@@ -162,7 +162,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Blanco arriba 6",
   "g": "fa",
-  "e": 4,
+  "e": 1,
   "a": "U2 F' U' F U' F' U F",
   "alt": [
    "F' U F U2 F' U' F",
@@ -174,7 +174,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Blanco arriba 7",
   "g": "fa",
-  "e": 4,
+  "e": 1,
   "a": "F U R U' R' F' R U' R'"
  },
  {
@@ -182,7 +182,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Blanco arriba 8",
   "g": "fa",
-  "e": 4,
+  "e": 1,
   "a": "U R U' R' U' R U' R' U R U' R'",
   "alt": [
    "U2 R2 U2 R' U' R U' R2"
@@ -193,7 +193,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 1",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "R U' R' U2 F' U' F"
  },
  {
@@ -201,7 +201,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 2",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U' R U R' U2 R U' R'"
  },
  {
@@ -209,7 +209,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 3",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U F' U' F U2 F' U F"
  },
  {
@@ -217,7 +217,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 4",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U' R U2 R' U2 R U' R'",
   "alt": [
    "U R U2 R' U2 R U' R'"
@@ -228,7 +228,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 5",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U F' U2 F U2 F' U F"
  },
  {
@@ -236,7 +236,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 6",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U' R U' R' U F' U' F",
   "alt": [
    "U F' U' F U' F' U' F"
@@ -247,7 +247,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 7",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U' R U R' U R U R'",
   "alt": [
    "U2 R U' R' U' R U R'"
@@ -258,7 +258,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 8",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U' R U2 R' U F' U' F"
  },
  {
@@ -266,7 +266,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 9",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U F' U F U' F' U' F"
  },
  {
@@ -274,7 +274,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 10",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "U' R U' R' U R U R'"
  },
  {
@@ -282,7 +282,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Al costado 11",
   "g": "fc",
-  "e": 4,
+  "e": 1,
   "a": "R' D' R U' R' D R U R U' R'"
  },
  {
@@ -363,7 +363,7 @@ var F2L_CASES = [
   "set": "F2L",
   "name": "Esquina abajo 1",
   "g": "fk",
-  "e": 4,
+  "e": 1,
   "a": "R U' R' U R U' R'",
   "alt": [
    "R U R' U' R U R' U' R U R' U' R U R'"

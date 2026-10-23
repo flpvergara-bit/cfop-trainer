@@ -1,4 +1,6 @@
 /* Genera y verifica los casos de F2L. Candidatos de memoria primero; lo que falte, por búsqueda. */
+/* Los 24 casos de la guía F2L reducida (myrubik.com): van en la etapa 1 */
+const REDUCIDO = ["F2L-fa1", "F2L-fa2", "F2L-fa3", "F2L-fa4", "F2L-fa5", "F2L-fa6", "F2L-fa7", "F2L-fa8", "F2L-fc1", "F2L-fc10", "F2L-fc11", "F2L-fc2", "F2L-fc3", "F2L-fc4", "F2L-fc5", "F2L-fc6", "F2L-fc7", "F2L-fc8", "F2L-fc9", "F2L-fd1", "F2L-fd2", "F2L-fd3", "F2L-fd4", "F2L-fk1"];
 const C = require('./engine.js');
 const CANDS = [
 "U R U' R'","U' F' U F","F' U' F","R U R'",
@@ -96,7 +98,7 @@ const NAMES = { fd: 'Directo', fa: 'Blanco arriba', fc: 'Al costado', fe: 'Arist
 const out = [];
 for (const g of Object.keys(groups)) {
   groups[g].sort((a, b) => C.parse(a.algs[0]).length - C.parse(b.algs[0]).length);
-  groups[g].forEach((c, i) => out.push({ id: 'F2L-' + g + (i + 1), set: 'F2L', name: NAMES[g] + ' ' + (i + 1), g, e: 4, a: c.algs[0], alt: c.algs.slice(1, 3), buscado: !!c.buscado }));
+  groups[g].forEach((c, i) => out.push({ id: 'F2L-' + g + (i + 1), set: 'F2L', name: NAMES[g] + ' ' + (i + 1), g, e: REDUCIDO.indexOf('F2L-' + g + (i + 1)) >= 0 ? 1 : 4, a: c.algs[0], alt: c.algs.slice(1, 3), buscado: !!c.buscado }));
   console.log(g, groups[g].length);
 }
 /* Principiante */
