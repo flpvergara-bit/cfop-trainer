@@ -67,10 +67,10 @@ var CASES = [
   { id: 'Ub', g: 'aristas', e: 3, a: "M2 U' M U2 M' U' M2", alt: ["R2 U R U R' U' R' U' R' U R'"] },
   { id: 'H', g: 'aristas', e: 3, a: "M2 U M2 U2 M2 U M2" },
   { id: 'Z', g: 'aristas', e: 3, a: "M' U M2 U M2 U M' U2 M2", alt: ["M2 U M2 U M' U2 M2 U2 M'"] },
-  { id: 'Aa', g: 'esquinasp', e: 6, a: "x R' U R' D2 R U' R' D2 R2 x'", alt: ["x L2 D2 L' U' L D2 L' U L' x'"] },
+  { id: 'Aa', g: 'esquinasp', e: 3, a: "x R' U R' D2 R U' R' D2 R2 x'", alt: ["x L2 D2 L' U' L D2 L' U L' x'"] },
   { id: 'Ab', g: 'esquinasp', e: 6, a: "x R2 D2 R U R' D2 R U' R x'", alt: ["x L U' L D2 L' U L D2 L2 x'"] },
   { id: 'E', g: 'esquinasp', e: 6, a: "x' R U' R' D R U R' D' R U R' D R U' R' D' x" },
-  { id: 'T', g: 'adyacente', e: 3, a: "R U R' U' R' F R2 U' R' U' R U R' F'" },
+  { id: 'T', g: 'adyacente', e: 6, a: "R U R' U' R' F R2 U' R' U' R U R' F'" },
   { id: 'F', g: 'adyacente', e: 6, a: "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R" },
   { id: 'Ja', g: 'adyacente', e: 6, a: "x R2 F R F' R U2 r' U r U2 x'", alt: ["L' U' L F L' U' L U L F' L2 U L"] },
   { id: 'Jb', g: 'adyacente', e: 6, a: "R U R' F' R U R' U' R' F R2 U' R'" },
@@ -80,8 +80,8 @@ var CASES = [
   { id: 'Gb', g: 'adyacente', e: 6, a: "R' U' R U D' R2 U R' U R U' R U' R2 D" },
   { id: 'Gc', g: 'adyacente', e: 6, a: "R2 U' R U' R U R' U R2 U D' R U' R' D" },
   { id: 'Gd', g: 'adyacente', e: 6, a: "R U R' U' D R2 U' R U' R' U R' U R2 D'" },
-  { id: 'Y', g: 'diagonal', e: 3, a: "F R U' R' U' R U R' F' R U R' U' R' F R F'" },
-  { id: 'V', g: 'diagonal', e: 6, a: "R' U R' U' R D' R' D R' U D' R2 U' R2 D R2" },
+  { id: 'Y', g: 'diagonal', e: 6, a: "F R U' R' U' R U R' F' R U R' U' R' F R F'" },
+  { id: 'V', g: 'diagonal', e: 3, a: "R' U R' U' R D' R' D R' U D' R2 U' R2 D R2" },
   { id: 'Na', g: 'diagonal', e: 6, a: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'" },
   { id: 'Nb', g: 'diagonal', e: 6, a: "R' U R U' R' F' U' F R U R' F R' F' R U' R" }
 ];
