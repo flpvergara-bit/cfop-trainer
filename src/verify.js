@@ -7,14 +7,7 @@ for (const c of CASES) {
   if (kind === 'eo') continue;
   if (sigs[kind + r.sig]) { console.log('DUPLICADO', c.id, 'igual a', sigs[kind + r.sig]); bad++; }
   sigs[kind + r.sig] = c.id; c._sig = r.sig; c._count = r.count;
-  // ¿queda resuelto exacto (PLL)?
-  if (kind === 'pll') {
-    const end = C.apply(C.clone(r.cs.state), c.a);
-    const fin = C.caseState(c.a);
-    let auf = null;
-    for (const u of ['', 'U', 'U2', "U'"]) { const e = C.apply(C.apply(C.clone(r.cs.state), c.a), u); if (C.centersOk(e) && C.serialize(e) === C.SOLVED_STR) auf = u; }
-    if (r.cs.prefix) console.log('  nota', c.id, 'prefijo de orientación', r.cs.prefix);
-  }
+  if (kind === 'pll' && r.cs.prefix) console.log('  nota', c.id, 'prefijo de orientación', r.cs.prefix);
   for (const alt of (c.alt || [])) {
     const ra = C.check(alt, kind);
     if (!ra.ok || ra.sig !== r.sig) { console.log('ALT NO COINCIDE', c.id, alt, ra.ok ? 'otro caso' : ra.why); bad++; }

@@ -133,13 +133,13 @@
   relabel();
   /* Guías impresas: cada algoritmo válido se asocia a su caso; si es nuevo, entra como alternativa */
   function normA(x) { return Cube.str(Cube.parse(x)); }
+  function addGuia(c, x, nombre) { var k = normA(x); c.guia = c.guia || {}; c.guia[k] = nombre; if ([c.a].concat(c.alt || []).map(normA).indexOf(k) < 0) (c.alt = c.alt || []).push(x); }
   var GUIA_FALLIDOS = [];
   GUIAS.forEach(function (g) {
     g.algs.forEach(function (x) {
       var r = Cube.check(x, g.kind), c = r.ok && CASES.filter(function (k) { return k.kind === g.kind && k.sig === r.sig; })[0];
       if (!c) { GUIA_FALLIDOS.push(x); return; }
-      c.guia = c.guia || {}; c.guia[normA(x)] = g.name;
-      if ([c.a].concat(c.alt || []).map(normA).indexOf(normA(x)) < 0) (c.alt = c.alt || []).push(x);
+      addGuia(c, x, g.name);
     });
   });
   /* Erratas de las guías: el algoritmo impreso no funciona; se registra la versión corregida */
@@ -149,7 +149,7 @@
      nota: ["En la guía impresa aparece como L U L' y x L' U L F' L' U' L, pero ese giro de cubo no deja los centros en su sitio. Esta es la versión que funciona: cambia x por x'.", "The printed guide shows it as L U L' y x L' U L F' L' U' L, but that cube rotation does not leave the centers in place. This is the version that works: x becomes x'."] }
   ].forEach(function (e) {
     var r = Cube.check(e.ok, e.kind), c = CASES.filter(function (k) { return k.kind === e.kind && k.sig === r.sig; })[0];
-    if (c) { c.guia = c.guia || {}; c.guia[normA(e.ok)] = e.guia; c.guiaNota = e.nota; }
+    if (c) { addGuia(c, e.ok, e.guia); c.guiaNota = e.nota; }
   });
   var GUIA_EN = { 'OLL reducido': 'Reduced OLL', 'PLL reducido': 'Reduced PLL', 'F2L reducido': 'Reduced F2L', 'OLL completo': 'Full OLL', 'PLL completo': 'Full PLL', 'F2L completo': 'Full F2L' };
   function guiaDe(c, alg) { return c.guia && c.guia[normA(alg)] || ''; }
@@ -222,7 +222,7 @@
     if (!remote.doc || remote.writing || !remote.dirty) return;
     remote.writing = true; remote.dirty = false; setSync('saving');
     remote.doc.set(JSON.parse(JSON.stringify(store))).then(function () { setSync('cloud'); }, function (e) {
-      if (e && e.code === 'unavailable' && remote.retry < 1) { remote.retry++; remote.dirty = true; setSync('cloud'); }
+      if (e && e.code === 'unavailable' && remote.retry < 1) { remote.retry++; remote.dirty = true; setSync('saving'); }
       else { remote.doc = null; setSync('local'); }
     }).then(function () {
       remote.writing = false;
@@ -250,19 +250,11 @@
   document.addEventListener('visibilitychange', function () { if (document.hidden && remote.dirty) { clearTimeout(remote.timer); flush(); } });
 
   /* ---------- Utilidades de algoritmos ---------- */
-  function simplify(ms) {
-    var out = [];
-    ms.forEach(function (m) {
-      var l = out[out.length - 1];
-      if (l && l.b === m.b) { l.t = (l.t + m.t) % 4; if (!l.t) out.pop(); } else out.push({ b: m.b, t: m.t });
-    });
-    return out;
-  }
   function inv1(m) { return { b: m.b, t: (4 - m.t) % 4 }; }
   function setupOf(alg, pre, post) {
     if (Cube.caseState(alg).prefix) alg = Cube.str(Cube.derotate(Cube.parse(alg)));   /* algoritmos con y, d…: mezcla sin girar el cubo */
     var cs = Cube.caseState(alg, pre, post);
-    return { state: cs.state, prefix: cs.prefix, moves: simplify(Cube.parse(pre || '').concat(Cube.parse(cs.prefix), Cube.invert(Cube.parse(alg)), Cube.parse(post || ''))) };
+    return { state: cs.state, prefix: cs.prefix, moves: Cube.simplify(Cube.parse(pre || '').concat(Cube.parse(cs.prefix), Cube.invert(Cube.parse(alg)), Cube.parse(post || ''))) };
   }
   /* Dibuja un algoritmo como movimientos; agrupa los gatillos conocidos. lead/tail = ajustes de U entre paréntesis */
   /* Bloques de gatillos conocidos: [{s, e, n}] */
@@ -582,10 +574,11 @@
   }
   Player.prototype.reset = function () { this.gen++; this.playing = false; this.busy = false; this.i = 0; this.cube.setState(Cube.clone(this.start)); this.mark(-1); this.emit(); };
   Player.prototype.halt = function () { this.gen++; this.playing = false; this.busy = false; this.cube.cancel(); };
+  Player.prototype.nudge = function (dir) { this.playing = false; this.stopAt = null; return this.step(dir); };
   function controls(pl, withSpeed) {
     var bPlay = fixedBtn('btn pri', [['play', L('Reproducir', 'Play')], ['seguir', L('Seguir', 'Resume')], ['pausa', L('Pausa', 'Pause')]], function () { pl.play(); });
-    var bPrev = h('button', { class: 'btn', 'aria-label': L('Paso atrás', 'Step back'), html: ICON.prev, onclick: function () { pl.playing = false; pl.step(-1); } });
-    var bNext = h('button', { class: 'btn', 'aria-label': L('Paso adelante', 'Step forward'), html: ICON.next, onclick: function () { pl.playing = false; pl.step(1); } });
+    var bPrev = h('button', { class: 'btn', 'aria-label': L('Paso atrás', 'Step back'), html: ICON.prev, onclick: function () { pl.nudge(-1); } });
+    var bNext = h('button', { class: 'btn', 'aria-label': L('Paso adelante', 'Step forward'), html: ICON.next, onclick: function () { pl.nudge(1); } });
     var bReset = h('button', { class: 'btn', 'aria-label': L('Volver al inicio', 'Back to start'), html: ICON.reset, onclick: function () { pl.reset(); } });
     var kids = [bReset, bPrev, bPlay, bNext];
     if (withSpeed) {
@@ -777,8 +770,8 @@
   document.addEventListener('keydown', function (e) {
     if (!detKey(e) || !det.pl) return;
     if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); if (!e.repeat) det.pl.play(); }
-    else if (e.key === 'ArrowRight') { e.preventDefault(); det.pl.playing = false; det.pl.step(1); }
-    else if (e.key === 'ArrowLeft') { e.preventDefault(); det.pl.playing = false; det.pl.step(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); det.pl.nudge(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); det.pl.nudge(-1); }
   });
   document.addEventListener('keyup', function (e) { if (detKey(e) && (e.code === 'Space' || e.key === ' ')) e.preventDefault(); });
 
@@ -834,15 +827,11 @@
   function pool() {
     var v = store.prefs.set;
     if (v === 'uno' && pr.only) return [pr.only];
-    if (v === 'aprendiendo') return CASES.filter(function (c) { return peek(c.id).s === 1; });
-    if (v === 'f2l') return CASES.filter(function (c) { return c.kind === 'f2l'; });
-    if (v === 'oll') return CASES.filter(function (c) { return c.kind === 'oll'; });
-    if (v === 'pll') return CASES.filter(function (c) { return c.kind === 'pll'; });
-    return stageCases(+v.slice(1));
+    return casesOf(v);
   }
   function practiceOnly(c) { pr.only = c; store.prefs.set = 'uno'; setView('practicar'); setOptions(); nextCase(); }
-  function pick(list) {
-    var cand = list.length > 1 && pr.last ? list.filter(function (c) { return c !== pr.last; }) : list;
+  function pick(list, last) {
+    var cand = list.length > 1 && last ? list.filter(function (c) { return c !== last; }) : list;
     var tot = cand.reduce(function (s, c) { return s + (peek(c.id).w || 3); }, 0), r = Math.random() * tot;
     for (var i = 0; i < cand.length; i++) { r -= (peek(cand[i].id).w || 3); if (r <= 0) return cand[i]; }
     return cand[cand.length - 1];
@@ -861,7 +850,7 @@
       ]));
       return;
     }
-    var c = pick(list), alg = algOf(c), moves = Cube.parse(alg), pre = '', post = '';
+    var c = pick(list, pr.last), alg = algOf(c), moves = Cube.parse(alg), pre = '', post = '';
     if (store.prefs.auf) { post = rnd(['', 'U', "U'", 'U2']); if (c.kind === 'pll' && !Cube.caseState(alg).prefix) pre = rnd(['', 'U', "U'", 'U2']); }
     var su = setupOf(alg, pre, post), lead = Cube.invert(Cube.parse(post)), tail = Cube.invert(Cube.parse(pre));
     pr.last = c; pr.cur = { c: c, alg: alg, su: su, lead: lead, tail: tail, all: lead.concat(moves, tail), moves: moves };
@@ -970,9 +959,7 @@
       box.appendChild(h('div', { class: 'vacio' }, [h('h3', { text: L('No hay casos en este grupo', 'No cases in this group') }), h('p', { class: 'nota', text: L('Marca casos como «Aprendiendo» en la pestaña Casos, o elige una etapa.', 'Mark cases as "Learning" in the Cases tab, or choose a stage.') })]));
       return;
     }
-    var cand = list.length > 1 && fc.last ? list.filter(function (c) { return c !== fc.last; }) : list;
-    var tot = cand.reduce(function (s, c) { return s + (peek(c.id).w || 3); }, 0), r = Math.random() * tot, c = cand[cand.length - 1];
-    for (var i = 0; i < cand.length; i++) { r -= (peek(cand[i].id).w || 3); if (r <= 0) { c = cand[i]; break; } }
+    var c = pick(list, fc.last);
     fc.cur = c; fc.last = c; fc.open = false;
     fc.rot = store.prefs.fcrot && !isF2L(c) ? Math.floor(Math.random() * 4) * 90 : 0;
     var alg = algOf(c), moves = Cube.parse(alg);
@@ -1017,17 +1004,18 @@
   $('#fc-set').addEventListener('change', function (e) { store.prefs.fcset = e.target.value; touch(); fcNext(); });
   $('#fc-girar').addEventListener('change', function (e) { store.prefs.fcrot = e.target.checked; touch(); fcNext(); });
   function fcKey(e) { return ui.view === 'tarjetas' && !dlg.open && !aj.dlg.open && !e.metaKey && !e.ctrlKey && !e.altKey && !/^(INPUT|SELECT|TEXTAREA)$/.test((e.target && e.target.tagName) || ''); }
+  function fcFlipKey(e) { return (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') && !(e.target && e.target.tagName === 'BUTTON'); }
   document.addEventListener('keydown', function (e) {
     if (!fcKey(e)) return;
-    if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) fcFlip(); }
+    if (fcFlipKey(e)) { e.preventDefault(); if (!e.repeat) fcFlip(); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); fcNext(); }
     else if (e.key === '1' && fc.open) fcRate(false);
     else if (e.key === '2' && fc.open) fcRate(true);
   });
-  document.addEventListener('keyup', function (e) { if (fcKey(e) && (e.code === 'Space' || e.key === ' ' || e.key === 'Enter')) e.preventDefault(); });
+  document.addEventListener('keyup', function (e) { if (fcKey(e) && fcFlipKey(e)) e.preventDefault(); });
 
   /* ---------- Vista: Notación ---------- */
-  var nt = { cube: null, mod: '', q: Promise.resolve() };
+  var nt = { cube: null, mod: '', q: Promise.resolve(), gen: 0 };
   var MOVE_TXT = {
     R: ['La cara derecha. Sentido normal: horario mirándola desde la derecha (la fila de adelante sube).', 'The right face. Normal direction: clockwise as seen from the right (the front row goes up).'],
     L: ['La cara izquierda. Sentido normal: horario mirándola desde la izquierda (la fila de adelante baja).', 'The left face. Normal direction: clockwise as seen from the left (the front row goes down).'],
@@ -1051,12 +1039,14 @@
   var MOD_TXT = { '': ['Sin marca: un cuarto de vuelta en su sentido normal.', 'No mark: a quarter turn in its normal direction.'], "'": ['Con apóstrofo: un cuarto de vuelta al revés.', 'With an apostrophe (prime): a quarter turn the other way.'], '2': ['Con un 2: media vuelta.', 'With a 2: a half turn.'] };
   function ntRun(alg, label, txt) {
     $('#not-lee').innerHTML = ''; $('#not-lee').appendChild(h('b', { text: label })); $('#not-lee').appendChild(document.createTextNode(txt.replace(/^\s+/, '')));
-    Cube.parse(alg).forEach(function (m) { nt.q = nt.q.then(function () { return nt.cube.move(m, 380); }).catch(function () { }); });
+    var g = nt.gen;
+    Cube.parse(alg).forEach(function (m) { nt.q = nt.q.then(function () { if (g !== nt.gen) return; return nt.cube.move(m, 380); }).catch(function () { }); });
   }
+  function ntReset() { nt.q = Promise.resolve(); nt.gen++; nt.cube.setState(Cube.solved()); }
   function initNotacion() {
     if (nt.cube) return;
     nt.cube = new Cube3D($('#not-cubo'), { white: true });
-    $('#not-reset').addEventListener('click', function () { nt.q = Promise.resolve(); nt.cube.setState(Cube.solved()); $('#not-lee').textContent = L('Toca una letra para ver el giro en el cubo.', 'Tap a letter to see the turn on the cube.'); });
+    $('#not-reset').addEventListener('click', function () { ntReset(); $('#not-lee').textContent = L('Toca una letra para ver el giro en el cubo.', 'Tap a letter to see the turn on the cube.'); });
     nt.run = ntRun; renderNotacion();
   }
   function renderNotacion() {
@@ -1260,7 +1250,7 @@
     list.forEach(function (t) {
       var def = TRIG_DEF.filter(function (d) { return (d.n[0] === t.n || d.n[1] === t.n) && Cube.str(Cube.parse(d.a)) === Cube.str(Cube.parse(t.a)); })[0];
       var alg = Cube.str(Cube.parse(t.a)), dd = def ? tx(def.d) : '';
-      box.appendChild(h('button', { onclick: function () { nt.q = Promise.resolve(); nt.cube.setState(Cube.solved()); nt.run(alg, t.n, alg + (dd ? '. ' + dd : '.')); } }, [h('b', { text: alg }), h('span', { text: t.n + (dd ? '. ' + dd : '') })]));
+      box.appendChild(h('button', { onclick: function () { ntReset(); nt.run(alg, t.n, alg + (dd ? '. ' + dd : '.')); } }, [h('b', { text: alg }), h('span', { text: t.n + (dd ? '. ' + dd : '') })]));
     });
   }
   /* Volver a dibujar todo lo que muestra algoritmos cuando cambia la lista de nombres */

@@ -102,7 +102,7 @@ for (const g of Object.keys(groups)) {
   console.log(g, groups[g].length);
 }
 /* Principiante */
-const simp = a => { const r = []; C.parse(a).forEach(m => { const l = r[r.length - 1]; if (l && l.b === m.b) { l.t = (l.t + m.t) % 4; if (!l.t) r.pop(); } else r.push({ b: m.b, t: m.t }); }); return C.str(r); };
+const simp = a => C.str(C.simplify(C.parse(a)));
 const BEG = [
   { id: 'F2Lb-c1', name: 'Esquina · blanco a la derecha', g: 'f2lc', k: 'f2lc', a: "R U R'" },
   { id: 'F2Lb-c2', name: 'Esquina · blanco al frente', g: 'f2lc', k: 'f2lc', a: "F' U' F", alt: ["U R U' R'"] },
