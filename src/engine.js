@@ -131,8 +131,11 @@ var Cube = (function () {
         });
       }
     });
+    return simplify(out);
+  }
+  function simplify(ms) {
     var r = [];
-    out.forEach(function (m) { var l = r[r.length - 1]; if (l && l.b === m.b) { l.t = (l.t + m.t) % 4; if (!l.t) r.pop(); } else r.push({ b: m.b, t: m.t }); });
+    ms.forEach(function (m) { var l = r[r.length - 1]; if (l && l.b === m.b) { l.t = (l.t + m.t) % 4; if (!l.t) r.pop(); } else r.push({ b: m.b, t: m.t }); });
     return r;
   }
   /* ---- F2L ---- */
@@ -180,7 +183,6 @@ var Cube = (function () {
     var cs = caseState(alg);
     if (!cs) return { ok: false, why: 'centros' };
     if (!f2lOk(cs.state)) return { ok: false, why: 'f2l' };
-    var end = apply(clone(cs.state), cs.prefix ? invert(parse(cs.prefix)) : []);
     if (kind === 'eo') {
       var eoOk = cs.state.some(function (s) { return s.p[1] === 1 && s.n[1] === 1 && (Math.abs(s.p[0]) + Math.abs(s.p[2]) === 1) && s.c !== 'U'; });
       return { ok: eoOk, cs: cs, why: eoOk ? '' : 'no cambia aristas' };
@@ -195,6 +197,6 @@ var Cube = (function () {
   }
   return { FACE_N: FACE_N, MOVES: MOVES, rot: rot, solved: solved, clone: clone, parse: parse, tok: tok, str: str, invert: invert,
     applyMove: applyMove, apply: apply, key: key, index: index, serialize: serialize, SOLVED_STR: SOLVED_STR, faceOfNormal: faceOfNormal,
-    centersOk: centersOk, f2lOk: f2lOk, topOriented: topOriented, caseState: caseState, ollSig: ollSig, pllSig: pllSig, check: check, derotate: derotate, piecesAt: piecesAt, solvedAt: solvedAt, findPiece: findPiece, homeColors: homeColors, CROSS: CROSS, DC: DC, MID: MID };
+    centersOk: centersOk, f2lOk: f2lOk, topOriented: topOriented, caseState: caseState, ollSig: ollSig, pllSig: pllSig, check: check, derotate: derotate, simplify: simplify, piecesAt: piecesAt, solvedAt: solvedAt, findPiece: findPiece, homeColors: homeColors, CROSS: CROSS, DC: DC, MID: MID };
 })();
 if (typeof module !== 'undefined') module.exports = Cube;
