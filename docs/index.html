@@ -1792,6 +1792,15 @@ var GUIAS = [
     });
     return out;
   }
+  /* PLL: si el algoritmo termina sin su U final, las esquinas salen giradas y se dibujarían flechas de más; se elige el ajuste de U con menos flechas */
+  function pllAligned(alg) {
+    var best = null, n = 99;
+    ['', 'U', 'U2', "U'"].forEach(function (pre) {
+      var cs = Cube.caseState(alg, pre), k = (pllArrows(cs.state).match(/<line/g) || []).length;
+      if (k < n) { n = k; best = cs.state; }
+    });
+    return best;
+  }
   /* F2L: deja en gris las piezas que no importan para el caso (los centros nunca) */
   function viewState(c, st) {
     if (!isF2L(c)) return st;
@@ -1827,7 +1836,7 @@ var GUIAS = [
     var ck = LANG + '|' + c.id + '|' + alg;
     if (!state && dgCache[ck]) return dgCache[ck];
     if (isF2L(c)) { var iso = isoDiagram(c, viewState(c, state || Cube.caseState(alg).state)); if (!state) dgCache[ck] = iso; return iso; }
-    var st = state || Cube.caseState(alg).state, d = topData(st), o = '<svg class="dg" viewBox="0 0 100 100" role="img" aria-label="' + L('Diagrama de ' + c.label + ' visto desde arriba', c.label + ' diagram seen from above') + '"><rect class="bg" x="12" y="12" width="76" height="76" rx="6"/>';
+    var st = state || (c.kind === 'pll' ? pllAligned(alg) : Cube.caseState(alg).state), d = topData(st), o = '<svg class="dg" viewBox="0 0 100 100" role="img" aria-label="' + L('Diagrama de ' + c.label + ' visto desde arriba', c.label + ' diagram seen from above') + '"><rect class="bg" x="12" y="12" width="76" height="76" rx="6"/>';
     for (var i = 0; i < 9; i++) {
       var col = i % 3, row = (i - col) / 3, corner = col !== 1 && row !== 1;
       var cls = c.kind === 'pll' ? 'u' : (c.kind === 'eo' && corner) ? 'unk' : (d.u[i] === 'U' ? 'u' : 'off');
